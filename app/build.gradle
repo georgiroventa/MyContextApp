@@ -33,6 +33,9 @@ dependencies {
     implementation 'com.google.firebase:firebase-database:16.0.1'
     implementation 'com.google.firebase:firebase-core:16.0.1'
     implementation 'com.squareup.picasso:picasso:2.5.2'
+    implementation "android.arch.work:work-runtime:1.0.0"
+
+
 }
 apply plugin: 'com.google.gms.google-services'
 com.google.gms.googleservices.GoogleServicesPlugin.config.disableVersionCheck = true

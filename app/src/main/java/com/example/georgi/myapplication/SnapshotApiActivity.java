@@ -5,6 +5,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.hardware.Sensor;
+import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.location.Location;
 import android.location.LocationListener;
@@ -41,14 +42,23 @@ import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.location.ActivityRecognitionResult;
 import com.google.android.gms.location.DetectedActivity;
 import com.google.android.gms.location.places.PlaceLikelihood;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.squareup.picasso.Picasso;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.TimeUnit;
 
-public class SnapshotApiActivity extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks {
+import androidx.work.PeriodicWorkRequest;
+import androidx.work.WorkManager;
+
+public class
+SnapshotApiActivity extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks{
     private static final int GET_LOCATION_PERMISSION_REQUEST_CODE = 1;
     private static final int GET_WEATHER_PERMISSION_REQUEST_CODE = 3;
 
@@ -59,6 +69,11 @@ public class SnapshotApiActivity extends AppCompatActivity implements GoogleApiC
 
     private SensorManager sensorManager;
     private Sensor light;
+
+    private FirebaseAuth mAuth;
+    private FirebaseDatabase database;
+    private DatabaseReference mDatabase;
+    FirebaseUser firebaseUser;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -73,6 +88,11 @@ public class SnapshotApiActivity extends AppCompatActivity implements GoogleApiC
 
         tl = (TextView)findViewById(R.id.textView_light);
 
+        mAuth = FirebaseAuth.getInstance();
+        database = FirebaseDatabase.getInstance();
+        mDatabase = database.getReference().child("DateAboutContextUser");
+        firebaseUser = mAuth.getCurrentUser();
+
         b5.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View view){
@@ -84,6 +104,12 @@ public class SnapshotApiActivity extends AppCompatActivity implements GoogleApiC
 
 
         buildApiClient();
+        PeriodicWorkRequest saveRequest =
+                new PeriodicWorkRequest.Builder(MyWorker.class, 15, TimeUnit.MINUTES)
+                         .build();
+
+        WorkManager.getInstance()
+                .enqueue(saveRequest);
     }
 
     public void statusCheck() {
@@ -158,18 +184,17 @@ public class SnapshotApiActivity extends AppCompatActivity implements GoogleApiC
             }
         });
 
-       // callSnapShotGroupApis();
     }
 
     /*
       This method will call all the snapshot group apis.
     */
-    private void callSnapShotGroupApis() {
+    public void callSnapShotGroupApis() {
         //get info about user's current activity
-        getCurrentActivity();
+        //getCurrentActivity();
 
         //get the current state of the headphones.
-        getHeadphoneStatus();
+        //getHeadphoneStatus();
 
         //get current location. This will need location permission, so first check that.
        /* if (ContextCompat.checkSelfPermission(SnapshotApiActivity.this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -178,8 +203,8 @@ public class SnapshotApiActivity extends AppCompatActivity implements GoogleApiC
                     new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION},
                     GET_LOCATION_PERMISSION_REQUEST_CODE);
         } else {*/
-            getLocation();
-       // }
+       // getLocation();
+        // }
 
         //get current place. This will need location permission, so first check that.
        /* if (ContextCompat.checkSelfPermission(SnapshotApiActivity.this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -188,8 +213,8 @@ public class SnapshotApiActivity extends AppCompatActivity implements GoogleApiC
                     new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION},
                     GET_PLACE_PERMISSION_REQUEST_CODE);
         } else {*/
-            //getPlace();
-       // }
+        //getPlace();
+        // }
 
         //get current weather conditions. This will need location permission, so first check that.
         /*if (ContextCompat.checkSelfPermission(SnapshotApiActivity.this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -198,9 +223,10 @@ public class SnapshotApiActivity extends AppCompatActivity implements GoogleApiC
                     new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION},
                     GET_WEATHER_PERMISSION_REQUEST_CODE);
         } else {*/
-            getWeather();
+        getWeather();
         //}
-}
+    }
+
 
     @Override
     public void onRequestPermissionsResult(final int requestCode, @NonNull final String[] permissions, @NonNull final int[] grantResults) {
@@ -241,7 +267,7 @@ public class SnapshotApiActivity extends AppCompatActivity implements GoogleApiC
                         public void onResult(@NonNull WeatherResult weatherResult) {
                             if (!weatherResult.getStatus().isSuccess()) {
                                 //Toast.makeText(SnapshotApiActivity.this, "Could not get weather.", Toast.LENGTH_LONG).show();
-                               statusCheck();
+                             //  statusCheck();
                                 Toast.makeText(SnapshotApiActivity.this, "ERoare vreme.", Toast.LENGTH_SHORT).show();
                                 return;
                             }
@@ -252,6 +278,7 @@ public class SnapshotApiActivity extends AppCompatActivity implements GoogleApiC
                             String weatherReport = "Temperature: " + weather.getTemperature(Weather.CELSIUS)
                                     + "\nHumidity: " + weather.getHumidity();
                             ((TextView) findViewById(R.id.weather_status)).setText(weatherReport);
+                            mDatabase.child(String.valueOf(firebaseUser)).child("weather").setValue(weatherReport);
                         }
                     });
     }
@@ -275,7 +302,7 @@ public class SnapshotApiActivity extends AppCompatActivity implements GoogleApiC
                     @Override
                     public void onResult(@NonNull LocationResult locationResult) {
                         if (!locationResult.getStatus().isSuccess()) {
-                            Toast.makeText(SnapshotApiActivity.this, "Could not get location.", Toast.LENGTH_LONG).show();
+                            Toast.makeText(SnapshotApiActivity.this, "Could not get location.", Toast.LENGTH_SHORT).show();
                            // statusCheck();
                             //Toast.makeText(SnapshotApiActivity.this, "Eroare.", Toast.LENGTH_SHORT).show();
                             return;
@@ -283,14 +310,14 @@ public class SnapshotApiActivity extends AppCompatActivity implements GoogleApiC
 
                         //get location
                         Location location = locationResult.getLocation();
-                        ((TextView) findViewById(R.id.current_latlng)).setText("Latitudine: "+ location.getLatitude() + ",Longitudine: " + location.getLongitude());
+                        String loc = "Latitudine: "+ location.getLatitude() + ",Longitudine: " + location.getLongitude();
+                        ((TextView) findViewById(R.id.current_latlng)).setText(loc);
+                        mDatabase.child(String.valueOf(firebaseUser)).child("location").setValue(loc);
 
                         //display the time
                         TextView timeTv = (TextView) findViewById(R.id.latlng_time);
                         SimpleDateFormat sdf = new SimpleDateFormat("h:mm a dd-MM-yyyy", Locale.getDefault());
                         timeTv.setText("Time & Date: " + sdf.format(new Date(location.getTime())));
-
-                       // locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 5000, 0, listener);
 
                         //Load the current map image from Google map
                         String url = "https://maps.googleapis.com/maps/api/staticmap?center="
@@ -318,6 +345,7 @@ public class SnapshotApiActivity extends AppCompatActivity implements GoogleApiC
                         //display the status
                         TextView headphoneStatusTv = (TextView) findViewById(R.id.headphone_status);
                         headphoneStatusTv.setText(headphoneState.getState() == HeadphoneState.PLUGGED_IN ? "Plugged in." : "Unplugged.");
+                       // mDatabase.child(String.valueOf(firebaseUser)).child("headphone").setValue(headphoneStatusTv);
                     }
                 });
     }
@@ -366,7 +394,7 @@ public class SnapshotApiActivity extends AppCompatActivity implements GoogleApiC
                                 activityName.setText("Walking");
                                 break;
                         }
-
+                       // mDatabase.child(String.valueOf(firebaseUser)).child("activity").setValue(activityName);
                         //set the confidante level
                         ProgressBar confidenceLevel = (ProgressBar) findViewById(R.id.probable_activity_confidence);
                         confidenceLevel.setProgress(probableActivity.getConfidence());
@@ -375,6 +403,9 @@ public class SnapshotApiActivity extends AppCompatActivity implements GoogleApiC
                         TextView timeTv = (TextView) findViewById(R.id.probable_activity_time);
                         SimpleDateFormat sdf = new SimpleDateFormat("h:mm a dd-MM-yyyy", Locale.getDefault());
                         timeTv.setText("Time & Date: " + sdf.format(new Date(ar.getTime())));
+                        String time = "Time & Date: " + sdf.format(new Date(ar.getTime()));
+                        mDatabase.child(String.valueOf(firebaseUser)).child("time").setValue(time);
+
                     }
                 });
     }
