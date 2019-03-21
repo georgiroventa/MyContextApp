@@ -1,5 +1,8 @@
 package com.example.georgi.myapplication;
 
+import android.app.job.JobInfo;
+import android.app.job.JobScheduler;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -20,6 +23,7 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
@@ -59,9 +63,9 @@ import androidx.work.WorkManager;
 
 public class
 SnapshotApiActivity extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks{
-    private static final int GET_LOCATION_PERMISSION_REQUEST_CODE = 1;
-    private static final int GET_WEATHER_PERMISSION_REQUEST_CODE = 3;
 
+
+    private static final String TAG = "SnapshotActivity";
     private GoogleApiClient mGoogleApiClient;
 
     private Button b1, b2, b3, b4, b5;
@@ -102,16 +106,11 @@ SnapshotApiActivity extends AppCompatActivity implements GoogleApiClient.Connect
             }
         });
 
-
         buildApiClient();
-        PeriodicWorkRequest saveRequest =
-                new PeriodicWorkRequest.Builder(MyWorker.class, 15, TimeUnit.MINUTES)
-                         .build();
+        //scheduleJob();
 
-        WorkManager.getInstance()
-                .enqueue(saveRequest);
     }
-
+    //check if location is enable, if not open the settings
     public void statusCheck() {
         final LocationManager manager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 
@@ -175,7 +174,6 @@ SnapshotApiActivity extends AppCompatActivity implements GoogleApiClient.Connect
 
             }
         });
-
         b4.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View view){
@@ -183,7 +181,6 @@ SnapshotApiActivity extends AppCompatActivity implements GoogleApiClient.Connect
 
             }
         });
-
     }
 
     /*
@@ -224,28 +221,8 @@ SnapshotApiActivity extends AppCompatActivity implements GoogleApiClient.Connect
                     GET_WEATHER_PERMISSION_REQUEST_CODE);
         } else {*/
         getWeather();
+        Log.d(TAG, "Call method API");
         //}
-    }
-
-
-    @Override
-    public void onRequestPermissionsResult(final int requestCode, @NonNull final String[] permissions, @NonNull final int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        //if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-            switch (requestCode) {
-                case GET_LOCATION_PERMISSION_REQUEST_CODE://location permission granted
-                    getLocation();
-                    break;
-
-                case GET_WEATHER_PERMISSION_REQUEST_CODE://location permission granted
-                    getWeather();
-                    break;
-            }
-       // }
-       // else {
-           // Toast.makeText(SnapshotApiActivity.this, "Permission was not granted.", Toast.LENGTH_LONG).show();
-        //}
-
     }
 
     /**
@@ -253,13 +230,13 @@ SnapshotApiActivity extends AppCompatActivity implements GoogleApiClient.Connect
      */
     //@RequiresPermission("android.permission.ACCESS_FINE_LOCATION")
     private void getWeather() {
-        if (ContextCompat.checkSelfPermission(SnapshotApiActivity.this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+       /* if (ContextCompat.checkSelfPermission(SnapshotApiActivity.this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 requestPermissions(new String[]{android.Manifest.permission.ACCESS_COARSE_LOCATION, android.Manifest.permission.ACCESS_FINE_LOCATION, android.Manifest.permission.INTERNET}
                         , GET_WEATHER_PERMISSION_REQUEST_CODE);
             }
             return;
-        }
+        }*/
         //noinspection MissingPermission
         Awareness.SnapshotApi.getWeather(mGoogleApiClient)
                     .setResultCallback(new ResultCallback<WeatherResult>() {
@@ -289,13 +266,13 @@ SnapshotApiActivity extends AppCompatActivity implements GoogleApiClient.Connect
      */
     //@RequiresPermission("android.permission.ACCESS_FINE_LOCATION")
     private void getLocation() {
-        if (ContextCompat.checkSelfPermission(SnapshotApiActivity.this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+      /*  if (ContextCompat.checkSelfPermission(SnapshotApiActivity.this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 requestPermissions(new String[]{android.Manifest.permission.ACCESS_COARSE_LOCATION, android.Manifest.permission.ACCESS_FINE_LOCATION, android.Manifest.permission.INTERNET}
                         , GET_LOCATION_PERMISSION_REQUEST_CODE);
             }
             return;
-        }
+        }*/
         //noinspection MissingPermission
         Awareness.SnapshotApi.getLocation(mGoogleApiClient)
                 .setResultCallback(new ResultCallback<LocationResult>() {
@@ -426,5 +403,22 @@ SnapshotApiActivity extends AppCompatActivity implements GoogleApiClient.Connect
         Intent intent=new Intent(SnapshotApiActivity.this,ParentActivity.class);
         startActivity(intent);
         finish();
+    }
+
+    public void scheduleJob() {
+        ComponentName componentName = new ComponentName(this, ColectJobService.class);
+        JobInfo info = new JobInfo.Builder(123, componentName)
+                .setRequiresCharging(true)
+                .setPersisted(true)
+                .setPeriodic(15 * 60 * 1000)
+                .build();
+
+        JobScheduler scheduler = (JobScheduler) getSystemService(JOB_SCHEDULER_SERVICE);
+        int resultCode = scheduler.schedule(info);
+        if (resultCode == JobScheduler.RESULT_SUCCESS) {
+            Log.d(TAG, "Job scheduled");
+        } else {
+            Log.d(TAG, "Job scheduling failed");
+        }
     }
 }

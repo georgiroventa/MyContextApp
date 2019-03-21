@@ -118,4 +118,10 @@ public class RequestActivity extends AppCompatActivity {
             }
         });
     }
+    @Override
+    public void onBackPressed() {
+        Intent intent=new Intent(RequestActivity.this,ParentActivity.class);
+        startActivity(intent);
+        finish();
+    }
 }
