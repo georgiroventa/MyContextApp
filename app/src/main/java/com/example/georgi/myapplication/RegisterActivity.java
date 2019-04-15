@@ -15,6 +15,7 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
@@ -51,6 +52,13 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
             }
         });*/
     }
+    @Override
+    public void onStart() {
+        super.onStart();
+        // Check if user is signed in (non-null) and update UI accordingly.
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+    }
+
 
     private void registerUser() {
         final String name = editTextName.getText().toString().trim();
@@ -115,6 +123,7 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
                                     phone,
                                     password
                             );
+                            FirebaseUser user_ac = mAuth.getCurrentUser();
                             Toast.makeText( RegisterActivity.this, getString(R.string.registration_success), Toast.LENGTH_LONG).show();
                             Intent start = new Intent(RegisterActivity.this, MainActivity.class);
                             start.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);

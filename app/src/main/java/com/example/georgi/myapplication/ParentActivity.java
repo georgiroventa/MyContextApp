@@ -15,6 +15,9 @@ import android.view.View;
 import android.widget.Button;
 
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.concurrent.TimeUnit;
 
@@ -24,6 +27,8 @@ import androidx.work.WorkManager;
 public class ParentActivity extends AppCompatActivity
 {
     FirebaseAuth mAuth;
+    private FirebaseDatabase database;
+    private DatabaseReference mDatabase;
     private static final int GET_PERMISSION_REQUEST_CODE = 1;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,15 +38,17 @@ public class ParentActivity extends AppCompatActivity
         mAuth = FirebaseAuth.getInstance();
         String password;
         String email;
+        database = FirebaseDatabase.getInstance();
+        mDatabase = database.getReference().child("DateAboutContextUser");
 
         getPermission();
 
-        if (MainActivity.userEmail != null)  {
+        if (mAuth.getCurrentUser() != null)  {
+            String uid = mAuth.getCurrentUser().getUid();
             final Button buttonU1 = (Button) findViewById(R.id.button_map);
             buttonU1.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    mAuth.signOut();
                     Intent intent = new Intent(ParentActivity.this, MapsActivity.class);
                     intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
@@ -54,7 +61,6 @@ public class ParentActivity extends AppCompatActivity
             buttonU5.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    mAuth.signOut();
                     Intent intent = new Intent(ParentActivity.this, RequestActivity.class);
                     intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
@@ -65,7 +71,6 @@ public class ParentActivity extends AppCompatActivity
             buttonU6.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    mAuth.signOut();
                     Intent intent = new Intent(ParentActivity.this, SnapshotApiActivity.class);
                     intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
@@ -89,6 +94,15 @@ public class ParentActivity extends AppCompatActivity
 
         }
     }
+    @Override
+    public void onStart() {
+        super.onStart();
+        // Check if user is signed in (non-null) and update UI accordingly.
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+    }
+
+
+
     public void getPermission(){
         if (ContextCompat.checkSelfPermission(ParentActivity.this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {

@@ -49,7 +49,7 @@ public class RequestActivity extends AppCompatActivity {
             @Override
             public void onClick(View view){
                 Calendar calendar = Calendar.getInstance();
-                SimpleDateFormat format = new SimpleDateFormat("HH:mm:ss");
+                SimpleDateFormat format = new SimpleDateFormat("EEEE, dd-MM-yyyy 'at' hh:mm:ss a ");
                 String time = "Current Time: " + format.format(calendar.getTime());
                 t1.setText(time);
 

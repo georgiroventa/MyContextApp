@@ -15,6 +15,7 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.PersistableBundle;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -53,6 +54,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.squareup.picasso.Picasso;
 
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -62,13 +64,13 @@ import androidx.work.PeriodicWorkRequest;
 import androidx.work.WorkManager;
 
 public class
-SnapshotApiActivity extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks{
+SnapshotApiActivity extends AppCompatActivity /*implements GoogleApiClient.ConnectionCallbacks*/{
 
 
     private static final String TAG = "SnapshotActivity";
     private GoogleApiClient mGoogleApiClient;
 
-    private Button b1, b2, b3, b4, b5;
+    private Button b1, b2, b3, b4, b5, b6;
     private TextView tl;
 
     private SensorManager sensorManager;
@@ -78,38 +80,56 @@ SnapshotApiActivity extends AppCompatActivity implements GoogleApiClient.Connect
     private FirebaseDatabase database;
     private DatabaseReference mDatabase;
     FirebaseUser firebaseUser;
+    public static Integer index = 0;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_snapshot_api);
 
-        b1 = (Button)findViewById(R.id.button_activity);
-        b2 = (Button)findViewById(R.id.button_headphone);
-        b3 = (Button)findViewById(R.id.button_location);
-        b4 = (Button)findViewById(R.id.button_weather);
-        b5 = (Button)findViewById(R.id.button_light);
-
-        tl = (TextView)findViewById(R.id.textView_light);
-
         mAuth = FirebaseAuth.getInstance();
+        firebaseUser = mAuth.getCurrentUser();
+        String uid2 = mAuth.getCurrentUser().getUid();
         database = FirebaseDatabase.getInstance();
         mDatabase = database.getReference().child("DateAboutContextUser");
-        firebaseUser = mAuth.getCurrentUser();
 
-        b5.setOnClickListener(new View.OnClickListener(){
-            @Override
-            public void onClick(View view){
-                sensorManager = (SensorManager)getSystemService(Context.SENSOR_SERVICE);
-                light = sensorManager.getDefaultSensor(Sensor.TYPE_LIGHT);
-                tl.setText(""+light);
-            }
-        });
+        if (mAuth.getCurrentUser() != null) {
+            //firebaseUser= mAuth.getCurrentUser();
+            String uid = mAuth.getCurrentUser().getUid();
 
-        buildApiClient();
-        //scheduleJob();
+            b1 = (Button) findViewById(R.id.button_activity);
+            b2 = (Button) findViewById(R.id.button_headphone);
+            b3 = (Button) findViewById(R.id.button_location);
+            b4 = (Button) findViewById(R.id.button_weather);
+            b5 = (Button) findViewById(R.id.button_light);
+            b6 = (Button) findViewById(R.id.button_all_apis);
 
+            tl = (TextView) findViewById(R.id.textView_light);
+
+            b5.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+                    light = sensorManager.getDefaultSensor(Sensor.TYPE_LIGHT);
+                    tl.setText("" + light);
+                }
+            });
+
+            //buildApiClient();
+            Snapshot sa = Snapshot.getInstance(getApplicationContext());
+            sa.callSnapShotGroupApis();
+            scheduleJob();
+
+        }
     }
+    @Override
+    public void onStart() {
+        super.onStart();
+        // Check if user is signed in (non-null) and update UI accordingly.
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+    }
+
     //check if location is enable, if not open the settings
     public void statusCheck() {
         final LocationManager manager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
@@ -141,18 +161,18 @@ SnapshotApiActivity extends AppCompatActivity implements GoogleApiClient.Connect
     /*
       Build the google api client to use awareness apis.
     */
-    private void buildApiClient() {
+    /*private void buildApiClient() {
         mGoogleApiClient = new GoogleApiClient.Builder(SnapshotApiActivity.this)
                 .addApi(Awareness.API)
                 .addConnectionCallbacks(this)
                 .build();
         mGoogleApiClient.connect();
     }
-
-    @Override
+*/
+    /*@Override
     public void onConnected(@Nullable final Bundle bundle) {
         //Google API client connected. Ready to use awareness api
-
+        /*
         b1.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View view){
@@ -174,105 +194,37 @@ SnapshotApiActivity extends AppCompatActivity implements GoogleApiClient.Connect
 
             }
         });
-        b4.setOnClickListener(new View.OnClickListener(){
+         b4.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View view){
-                getWeather();
+                getWeather(String timee);
 
             }
         });
-    }
+        */
+    /*
+        b6.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View view){
+                SnapshotApis sa = SnapshotApis.getInstance();
+                sa.callSnapShotGroupApis(mGoogleApiClient);
+
+
+            }
+        });
+*/
+    //}
+
+
+                            //((TextView) findViewById(R.id.weather_status)).setText(weatherReport);
+
 
     /*
-      This method will call all the snapshot group apis.
-    */
-    public void callSnapShotGroupApis() {
-        //get info about user's current activity
-        //getCurrentActivity();
-
-        //get the current state of the headphones.
-        //getHeadphoneStatus();
-
-        //get current location. This will need location permission, so first check that.
-       /* if (ContextCompat.checkSelfPermission(SnapshotApiActivity.this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(
-                    SnapshotApiActivity.this,
-                    new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION},
-                    GET_LOCATION_PERMISSION_REQUEST_CODE);
-        } else {*/
-       // getLocation();
-        // }
-
-        //get current place. This will need location permission, so first check that.
-       /* if (ContextCompat.checkSelfPermission(SnapshotApiActivity.this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(
-                    SnapshotApiActivity.this,
-                    new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION},
-                    GET_PLACE_PERMISSION_REQUEST_CODE);
-        } else {*/
-        //getPlace();
-        // }
-
-        //get current weather conditions. This will need location permission, so first check that.
-        /*if (ContextCompat.checkSelfPermission(SnapshotApiActivity.this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(
-                    SnapshotApiActivity.this,
-                    new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION},
-                    GET_WEATHER_PERMISSION_REQUEST_CODE);
-        } else {*/
-        getWeather();
-        Log.d(TAG, "Call method API");
-        //}
-    }
-
-    /**
-     * Get the current weather condition at current location.
+      Get user's current location. We are also displaying Google Static map.
      */
     //@RequiresPermission("android.permission.ACCESS_FINE_LOCATION")
-    private void getWeather() {
-       /* if (ContextCompat.checkSelfPermission(SnapshotApiActivity.this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                requestPermissions(new String[]{android.Manifest.permission.ACCESS_COARSE_LOCATION, android.Manifest.permission.ACCESS_FINE_LOCATION, android.Manifest.permission.INTERNET}
-                        , GET_WEATHER_PERMISSION_REQUEST_CODE);
-            }
-            return;
-        }*/
-        //noinspection MissingPermission
-        Awareness.SnapshotApi.getWeather(mGoogleApiClient)
-                    .setResultCallback(new ResultCallback<WeatherResult>() {
-                        @Override
-                        public void onResult(@NonNull WeatherResult weatherResult) {
-                            if (!weatherResult.getStatus().isSuccess()) {
-                                //Toast.makeText(SnapshotApiActivity.this, "Could not get weather.", Toast.LENGTH_LONG).show();
-                             //  statusCheck();
-                                Toast.makeText(SnapshotApiActivity.this, "ERoare vreme.", Toast.LENGTH_SHORT).show();
-                                return;
-                            }
-
-                            //parse and display current weather status
-                            //to get a Weather instance with the current local weather conditions and make a report
-                            Weather weather = weatherResult.getWeather();
-                            String weatherReport = "Temperature: " + weather.getTemperature(Weather.CELSIUS)
-                                    + "\nHumidity: " + weather.getHumidity();
-                            ((TextView) findViewById(R.id.weather_status)).setText(weatherReport);
-                            mDatabase.child(String.valueOf(firebaseUser)).child("weather").setValue(weatherReport);
-                        }
-                    });
-    }
-
-
-    /**
-     * Get user's current location. We are also displaying Google Static map.
-     */
-    //@RequiresPermission("android.permission.ACCESS_FINE_LOCATION")
-    private void getLocation() {
-      /*  if (ContextCompat.checkSelfPermission(SnapshotApiActivity.this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                requestPermissions(new String[]{android.Manifest.permission.ACCESS_COARSE_LOCATION, android.Manifest.permission.ACCESS_FINE_LOCATION, android.Manifest.permission.INTERNET}
-                        , GET_LOCATION_PERMISSION_REQUEST_CODE);
-            }
-            return;
-        }*/
+    /*
+    private void getLocation(final String timee) {
         //noinspection MissingPermission
         Awareness.SnapshotApi.getLocation(mGoogleApiClient)
                 .setResultCallback(new ResultCallback<LocationResult>() {
@@ -288,12 +240,15 @@ SnapshotApiActivity extends AppCompatActivity implements GoogleApiClient.Connect
                         //get location
                         Location location = locationResult.getLocation();
                         String loc = "Latitudine: "+ location.getLatitude() + ",Longitudine: " + location.getLongitude();
+                        float latitude = (float) location.getLatitude();
+                        float longitude = (float) location.getLongitude();
+                        mDatabase.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(timee).child("latitude").setValue(latitude);
+                        mDatabase.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(timee).child("longitude").setValue(longitude);
                         ((TextView) findViewById(R.id.current_latlng)).setText(loc);
-                        mDatabase.child(String.valueOf(firebaseUser)).child("location").setValue(loc);
 
                         //display the time
                         TextView timeTv = (TextView) findViewById(R.id.latlng_time);
-                        SimpleDateFormat sdf = new SimpleDateFormat("h:mm a dd-MM-yyyy", Locale.getDefault());
+                        SimpleDateFormat sdf = new SimpleDateFormat("EEEE, dd-MM-yyyy 'at' hh:mm:ss a ", Locale.getDefault());
                         timeTv.setText("Time & Date: " + sdf.format(new Date(location.getTime())));
 
                         //Load the current map image from Google map
@@ -304,11 +259,13 @@ SnapshotApiActivity extends AppCompatActivity implements GoogleApiClient.Connect
                     }
                 });
     }
+    */
 
-    /**
-     * Check whether the headphones are plugged in or not? This is under snapshot api category.
+    /*
+      Check whether the headphones are plugged in or not? This is under snapshot api category.
      */
-    private void getHeadphoneStatus() {
+    /*
+    private void getHeadphoneStatus(final String timee) {
         Awareness.SnapshotApi.getHeadphoneState(mGoogleApiClient)
                 .setResultCallback(new ResultCallback<HeadphoneStateResult>() {
                     @Override
@@ -321,17 +278,19 @@ SnapshotApiActivity extends AppCompatActivity implements GoogleApiClient.Connect
 
                         //display the status
                         TextView headphoneStatusTv = (TextView) findViewById(R.id.headphone_status);
-                        headphoneStatusTv.setText(headphoneState.getState() == HeadphoneState.PLUGGED_IN ? "Plugged in." : "Unplugged.");
-                       // mDatabase.child(String.valueOf(firebaseUser)).child("headphone").setValue(headphoneStatusTv);
+                        String headphoneStatus = headphoneState.getState() == HeadphoneState.PLUGGED_IN ? "Plugged in." : "Unplugged.";
+                        headphoneStatusTv.setText(headphoneStatus);
+                        mDatabase.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(timee).child("headphone").setValue(headphoneStatus);
                     }
                 });
     }
-
-    /**
-     * Get current activity of the user. This is under snapshot api category.
-     * Current activity and confidence level will be displayed on the screen.
+*/
+    /*
+      Get current activity of the user. This is under snapshot api category.
+      Current activity and confidence level will be displayed on the screen.
      */
-    private void getCurrentActivity() {
+    /*
+    private void getCurrentActivity(final  String timee) {
         Awareness.SnapshotApi.getDetectedActivity(mGoogleApiClient)
                 .setResultCallback(new ResultCallback<DetectedActivityResult>() {
                     @Override
@@ -348,46 +307,47 @@ SnapshotApiActivity extends AppCompatActivity implements GoogleApiClient.Connect
                         switch (probableActivity.getType()) {
                             case DetectedActivity.IN_VEHICLE:
                                 activityName.setText("In vehicle");
+                                mDatabase.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(timee).child("activity").setValue("In vehicle");
                                 break;
                             case DetectedActivity.ON_BICYCLE:
                                 activityName.setText("On bicycle");
+                                mDatabase.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(timee).child("activity").setValue("On bicycle");
                                 break;
                             case DetectedActivity.ON_FOOT:
                                 activityName.setText("On foot");
+                                mDatabase.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(timee).child("activity").setValue("On foot");
                                 break;
                             case DetectedActivity.RUNNING:
                                 activityName.setText("Running");
+                               mDatabase.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(timee).child("activity").setValue("Running");
                                 break;
                             case DetectedActivity.STILL:
                                 activityName.setText("Still");
-                                break;
-                            case DetectedActivity.TILTING:
-                                activityName.setText("Tilting");
+                                mDatabase.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(timee).child("activity").setValue("Still");
                                 break;
                             case DetectedActivity.UNKNOWN:
                                 activityName.setText("Unknown");
+                                mDatabase.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(timee).child("activity").setValue("Unknown");
                                 break;
                             case DetectedActivity.WALKING:
                                 activityName.setText("Walking");
+                                mDatabase.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(timee).child("activity").setValue("Walking");
                                 break;
                         }
-                       // mDatabase.child(String.valueOf(firebaseUser)).child("activity").setValue(activityName);
                         //set the confidante level
                         ProgressBar confidenceLevel = (ProgressBar) findViewById(R.id.probable_activity_confidence);
                         confidenceLevel.setProgress(probableActivity.getConfidence());
 
                         //display the time
                         TextView timeTv = (TextView) findViewById(R.id.probable_activity_time);
-                        SimpleDateFormat sdf = new SimpleDateFormat("h:mm a dd-MM-yyyy", Locale.getDefault());
+                        SimpleDateFormat sdf = new SimpleDateFormat(" hh:mm:ss a ", Locale.getDefault());
                         timeTv.setText("Time & Date: " + sdf.format(new Date(ar.getTime())));
-                        String time = "Time & Date: " + sdf.format(new Date(ar.getTime()));
-                        mDatabase.child(String.valueOf(firebaseUser)).child("time").setValue(time);
-
+                        mDatabase.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(timee).child("time").setValue(sdf.format(new Date(ar.getTime())));
                     }
                 });
-    }
+    } */
 
-    @Override
+    /*@Override
     public void onConnectionSuspended(final int i) {
         new AlertDialog.Builder(this)
                 .setMessage("Cannot connect to google api services.")
@@ -397,23 +357,29 @@ SnapshotApiActivity extends AppCompatActivity implements GoogleApiClient.Connect
                         finish();
                     }
                 }).show();
-    }
+    }*/
     @Override
     public void onBackPressed() {
         Intent intent=new Intent(SnapshotApiActivity.this,ParentActivity.class);
         startActivity(intent);
         finish();
     }
-
+    //jobScheduler
     public void scheduleJob() {
         ComponentName componentName = new ComponentName(this, ColectJobService.class);
+       // PersistableBundle bundle = new PersistableBundle();
+        Log.d(TAG, String.valueOf(mGoogleApiClient));
+        //bundle.putString("mGoogleApi", String.valueOf(mGoogleApiClient));
+
         JobInfo info = new JobInfo.Builder(123, componentName)
-                .setRequiresCharging(true)
+                //.setRequiresCharging(true)
+               // .setExtras(bundle)
                 .setPersisted(true)
                 .setPeriodic(15 * 60 * 1000)
                 .build();
 
         JobScheduler scheduler = (JobScheduler) getSystemService(JOB_SCHEDULER_SERVICE);
+      //  Log.i("bianca", String.valueOf(mDatabase.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).orderByChild("DateAboutContextUser").limitToLast(1)));
         int resultCode = scheduler.schedule(info);
         if (resultCode == JobScheduler.RESULT_SUCCESS) {
             Log.d(TAG, "Job scheduled");

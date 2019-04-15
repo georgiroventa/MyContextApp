@@ -48,11 +48,9 @@
         <activity
             android:name=".MapsActivity"
             android:label="@string/title_activity_maps" />
-        <activity android:name=".AwarenessLaunchActivity" />
         <activity android:name=".SnapshotApiActivity" />
-        <activity android:name=".CombineFenceApiActivity" />
-        <activity android:name=".ActivityFenceApiDemo" />
-        <activity android:name=".HeadphoneFenceApiActivity" />
+        <service android:name=".ColectJobService"
+            android:permission="android.permission.BIND_JOB_SERVICE" ></service>
     </application>
 
 </manifest>

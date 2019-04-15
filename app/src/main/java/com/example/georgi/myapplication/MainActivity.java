@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.FragmentActivity;
+import android.util.Log;
 import android.util.Patterns;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -17,7 +18,11 @@ import com.google.android.gms.common.api.Api;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.PendingResult;
 import com.google.android.gms.common.api.Status;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -35,6 +40,7 @@ public class MainActivity extends Activity implements OnClickListener {
     FirebaseAuth mAuth;
     EditText editTextEmail, editTextPassword;
     DatabaseReference mRef;
+    private String TAG = "MainActivity";
 
 
     @Override
@@ -51,6 +57,12 @@ public class MainActivity extends Activity implements OnClickListener {
 
         mRef = FirebaseDatabase.getInstance().getReference().child("Users");
 
+    }
+    @Override
+    public void onStart() {
+        super.onStart();
+        // Check if user is signed in (non-null) and update UI accordingly.
+        FirebaseUser currentUser = mAuth.getCurrentUser();
     }
 
     String password;
@@ -77,7 +89,7 @@ public class MainActivity extends Activity implements OnClickListener {
             return;
         }
 
-        if (mRef != null)
+        /*if (mRef != null)
             try {
                 mRef.addListenerForSingleValueEvent(new ValueEventListener() {
 
@@ -87,9 +99,10 @@ public class MainActivity extends Activity implements OnClickListener {
                         if (dataSnapshot.exists()) {
                             for (DataSnapshot result : dataSnapshot.getChildren()) {
                                 parent = result.getValue(Parent.class);
-
+                                userEmail = parent.getEmail();
                                 if ((parent != null) && (parent.getEmail().equals(email))) {
                                     userEmail = parent.getEmail();
+                                   String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
                                     String aux = parent.getType();
                                      if (aux.equals("user") && (password.equals(parent.password))) {
                                             userEmail = parent.getEmail();
@@ -98,16 +111,19 @@ public class MainActivity extends Activity implements OnClickListener {
                                             start.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                                             start.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
                                             startActivity(start);
+                                            return;
+
                                      } else {
                                             Toast.makeText(MainActivity.this, "The password is incorrect", Toast.LENGTH_LONG).show();
+                                            return;
                                         }
 
                                 }
-                                else{
-                                    Toast.makeText(MainActivity.this, "The user is not registered", Toast.LENGTH_LONG).show();
-                                }
+
 
                             }
+
+                            Toast.makeText(MainActivity.this, "The user is not registered", Toast.LENGTH_LONG).show();
                         }
                     }
 
@@ -119,7 +135,32 @@ public class MainActivity extends Activity implements OnClickListener {
                 });
             } catch (Exception e) {
                 Toast.makeText(MainActivity.this, "User don t exit!", Toast.LENGTH_LONG).show();
-            }
+            }*/
+        mAuth.signInWithEmailAndPassword(email, password)
+                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
+                    @Override
+                    public void onComplete(@NonNull Task<AuthResult> task) {
+                        if (task.isSuccessful()) {
+                            // Sign in success, update UI with the signed-in user's information
+                            Log.d(TAG, "signInWithEmail:success");
+                            FirebaseUser user = mAuth.getCurrentUser();
+                            String uid = user.getUid();
+                            Intent start = new Intent(MainActivity.this, ParentActivity.class);
+                            start.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                            start.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                            startActivity(start);
+                            return;
+                        } else {
+                            // If sign in fails, display a message to the user.
+                            Log.w(TAG, "signInWithEmail:failure", task.getException());
+                            Toast.makeText(MainActivity.this, "Authentication failed.",
+                                    Toast.LENGTH_SHORT).show();
+
+                        }
+
+                        // ...
+                    }
+                });
 
     }
 
