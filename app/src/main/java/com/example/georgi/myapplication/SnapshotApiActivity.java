@@ -49,10 +49,17 @@ import com.google.android.gms.location.DetectedActivity;
 import com.google.android.gms.location.places.PlaceLikelihood;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.ChildEventListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.squareup.picasso.Picasso;
 
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -81,7 +88,21 @@ SnapshotApiActivity extends AppCompatActivity /*implements GoogleApiClient.Conne
     private DatabaseReference mDatabase;
     FirebaseUser firebaseUser;
     public static Integer index = 0;
+    String time;
+    private static final String FILE_NAME = "test.txt";
 
+
+    public TextView activityName;
+    public TextView timeTv;
+    public TextView locTv;
+    public TextView headphoneStatusTv;
+    public TextView temperatureTv;
+
+    /*public String activity;
+    public String some;
+    public String location;
+    public String headphoneStatus;
+    public String weather;*/
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -89,14 +110,16 @@ SnapshotApiActivity extends AppCompatActivity /*implements GoogleApiClient.Conne
         setContentView(R.layout.activity_snapshot_api);
 
         mAuth = FirebaseAuth.getInstance();
-        firebaseUser = mAuth.getCurrentUser();
-        String uid2 = mAuth.getCurrentUser().getUid();
-        database = FirebaseDatabase.getInstance();
-        mDatabase = database.getReference().child("DateAboutContextUser");
+        //firebaseUser = mAuth.getCurrentUser();
+        //get a database reference
+        //database = FirebaseDatabase.getInstance();
+        mDatabase = FirebaseDatabase.getInstance().getReference().child("DateAboutContextUser").child(FirebaseAuth.getInstance().getCurrentUser().getUid());
+
 
         if (mAuth.getCurrentUser() != null) {
             //firebaseUser= mAuth.getCurrentUser();
             String uid = mAuth.getCurrentUser().getUid();
+            Log.i("currentUser",uid);
 
             b1 = (Button) findViewById(R.id.button_activity);
             b2 = (Button) findViewById(R.id.button_headphone);
@@ -107,6 +130,12 @@ SnapshotApiActivity extends AppCompatActivity /*implements GoogleApiClient.Conne
 
             tl = (TextView) findViewById(R.id.textView_light);
 
+            activityName = findViewById(R.id.probable_activity_name);
+            timeTv = findViewById(R.id.probable_activity_time);
+            locTv = findViewById(R.id.current_latlng);
+            headphoneStatusTv = findViewById(R.id.headphone_status);
+            temperatureTv = findViewById(R.id.weather_status);
+
             b5.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
@@ -116,9 +145,9 @@ SnapshotApiActivity extends AppCompatActivity /*implements GoogleApiClient.Conne
                 }
             });
 
-            //buildApiClient();
             Snapshot sa = Snapshot.getInstance(getApplicationContext());
-            sa.callSnapShotGroupApis();
+            time = sa.callSnapShotGroupApis();
+            displayData();
             scheduleJob();
 
         }
@@ -128,6 +157,129 @@ SnapshotApiActivity extends AppCompatActivity /*implements GoogleApiClient.Conne
         super.onStart();
         // Check if user is signed in (non-null) and update UI accordingly.
         FirebaseUser currentUser = mAuth.getCurrentUser();
+    }
+
+
+
+    public void displayData(){
+        Log.i("display: ", "sunt aici");
+        FileOutputStream fos = null;
+        //Log.i("Database", String.valueOf(mDatabase.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).orderByChild().limitToLast(1)));
+        // Attach a listener to read the data at our posts reference
+        //orderByChild(FirebaseAuth.getInstance().getCurrentUser().getUid()).limitToLast(1)
+
+        mDatabase.orderByKey().limitToLast(1).addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(DataSnapshot dataSnapshot, String prevChildKey) {
+                //set the activity name
+                //TextView activityName = (TextView) findViewById(R.id.probable_activity_name);
+                String activity = dataSnapshot.child("activity").getValue().toString();
+                activityName.setText(activity);
+                //Log.i("aiciiiiiiiiiii", activity);
+
+                //display the time
+                //TextView timeTv = (TextView) findViewById(R.id.probable_activity_time);
+                String some = dataSnapshot.child("time").getValue().toString();
+                timeTv.setText("Time & Date: " + some);
+                //Log.i("aiciiiiii_timp",some);
+
+                //display the location
+                //TextView locTv = (TextView) findViewById(R.id.current_latlng);
+                Double longitude = dataSnapshot.child("longitude").getValue(Double.class);
+                Double latitude = dataSnapshot.child("latitude").getValue(Double.class);
+                String location = "Latitude: " + latitude + "\n" +
+                        "Longitude: " + longitude;
+                locTv.setText(location);
+                Log.i("locationnnn", location);
+                // Log.i("aici_longi", String.valueOf(longitude));
+
+                //display the status
+                //TextView headphoneStatusTv = (TextView)findViewById(R.id.headphone_status);
+                String headphoneStatus = dataSnapshot.child("headphone").getValue().toString();
+                headphoneStatusTv.setText(headphoneStatus);
+
+                //display the weather
+                //TextView temperatureTv = (TextView) findViewById(R.id.weather_status);
+                Double temperature = dataSnapshot.child("temperature (°C)").getValue(Double.class);
+                Double humidity = dataSnapshot.child("humidity").getValue(Double.class);
+                String weather = "Temperature: " + temperature + "\nhumidity: " + humidity;
+                temperatureTv.setText(weather);
+                Log.i("aicii_temp", weather);
+
+                //Load the current map image from Google map
+                String url = "https://maps.googleapis.com/maps/api/staticmap?center="
+                        + longitude + "," + latitude
+                        + "&zoom=20&size=400x250&key=" + getString(R.string.google_maps_key);  // key_api = google_maps_key
+                Picasso.with(SnapshotApiActivity.this).load(url).into((ImageView) findViewById(R.id.current_map));
+            }
+
+            @Override
+            public void onChildChanged(DataSnapshot dataSnapshot, String prevChildKey) {}
+
+            @Override
+            public void onChildRemoved(DataSnapshot dataSnapshot) {}
+
+            @Override
+            public void onChildMoved(DataSnapshot dataSnapshot, String prevChildKey) {}
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {}
+        });
+            String text = activityName.getText().toString();
+            Log.i("prostuta: ", text);
+                try {
+                    fos = openFileOutput(FILE_NAME, MODE_PRIVATE);
+                    fos.write(text.getBytes());
+
+                    Toast.makeText(this, "Saved to " + getFilesDir() + "/" + FILE_NAME,
+                            Toast.LENGTH_LONG).show();
+                    //fos.write(text);
+                    //fos.
+                    //fos.write(some.getBytes());
+                    //fos.write(location.getBytes());
+                    //fos.write(headphoneStatus.getBytes());
+                    //fos.write(weather.getBytes());
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } finally {
+                    if (fos != null) {
+                        try {
+                            fos.close();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+
+
+    }
+
+
+
+
+    //jobScheduler
+    public void scheduleJob() {
+        ComponentName componentName = new ComponentName(this, ColectJobService.class);
+       // PersistableBundle bundle = new PersistableBundle();
+        Log.d(TAG, String.valueOf(mGoogleApiClient));
+        //bundle.putString("mGoogleApi", String.valueOf(mGoogleApiClient));
+
+        JobInfo info = new JobInfo.Builder(123, componentName)
+                //.setRequiresCharging(true)
+               // .setExtras(bundle)
+                .setPersisted(true)
+                .setPeriodic(15 * 60 * 1000)
+                .build();
+
+        JobScheduler scheduler = (JobScheduler) getSystemService(JOB_SCHEDULER_SERVICE);
+        int resultCode = scheduler.schedule(info);
+        if (resultCode == JobScheduler.RESULT_SUCCESS) {
+            Log.d(TAG, "Job scheduled");
+        } else {
+            Log.d(TAG, "Job scheduling failed");
+        }
     }
 
     //check if location is enable, if not open the settings
@@ -158,71 +310,33 @@ SnapshotApiActivity extends AppCompatActivity /*implements GoogleApiClient.Conne
         alert.show();
     }
 
-    /*
-      Build the google api client to use awareness apis.
-    */
-    /*private void buildApiClient() {
-        mGoogleApiClient = new GoogleApiClient.Builder(SnapshotApiActivity.this)
-                .addApi(Awareness.API)
-                .addConnectionCallbacks(this)
-                .build();
-        mGoogleApiClient.connect();
+    @Override
+    public void onBackPressed() {
+        Intent intent=new Intent(SnapshotApiActivity.this,ParentActivity.class);
+        startActivity(intent);
+        finish();
     }
-*/
-    /*@Override
-    public void onConnected(@Nullable final Bundle bundle) {
-        //Google API client connected. Ready to use awareness api
-        /*
-        b1.setOnClickListener(new View.OnClickListener(){
-            @Override
-            public void onClick(View view){
-               getCurrentActivity();
-
-            }
-        });
-        b2.setOnClickListener(new View.OnClickListener(){
-            @Override
-            public void onClick(View view){
-               getHeadphoneStatus();
-
-            }
-        });
-        b3.setOnClickListener(new View.OnClickListener(){
-            @Override
-            public void onClick(View view){
-                getLocation();
-
-            }
-        });
-         b4.setOnClickListener(new View.OnClickListener(){
-            @Override
-            public void onClick(View view){
-                getWeather(String timee);
-
-            }
-        });
-        */
-    /*
-        b6.setOnClickListener(new View.OnClickListener(){
-            @Override
-            public void onClick(View view){
-                SnapshotApis sa = SnapshotApis.getInstance();
-                sa.callSnapShotGroupApis(mGoogleApiClient);
+}
 
 
-            }
-        });
-*/
-    //}
 
 
-                            //((TextView) findViewById(R.id.weather_status)).setText(weatherReport);
+
+
+
+
+
+
+
+
+
+
 
 
     /*
       Get user's current location. We are also displaying Google Static map.
      */
-    //@RequiresPermission("android.permission.ACCESS_FINE_LOCATION")
+//@RequiresPermission("android.permission.ACCESS_FINE_LOCATION")
     /*
     private void getLocation(final String timee) {
         //noinspection MissingPermission
@@ -358,33 +472,3 @@ SnapshotApiActivity extends AppCompatActivity /*implements GoogleApiClient.Conne
                     }
                 }).show();
     }*/
-    @Override
-    public void onBackPressed() {
-        Intent intent=new Intent(SnapshotApiActivity.this,ParentActivity.class);
-        startActivity(intent);
-        finish();
-    }
-    //jobScheduler
-    public void scheduleJob() {
-        ComponentName componentName = new ComponentName(this, ColectJobService.class);
-       // PersistableBundle bundle = new PersistableBundle();
-        Log.d(TAG, String.valueOf(mGoogleApiClient));
-        //bundle.putString("mGoogleApi", String.valueOf(mGoogleApiClient));
-
-        JobInfo info = new JobInfo.Builder(123, componentName)
-                //.setRequiresCharging(true)
-               // .setExtras(bundle)
-                .setPersisted(true)
-                .setPeriodic(15 * 60 * 1000)
-                .build();
-
-        JobScheduler scheduler = (JobScheduler) getSystemService(JOB_SCHEDULER_SERVICE);
-      //  Log.i("bianca", String.valueOf(mDatabase.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).orderByChild("DateAboutContextUser").limitToLast(1)));
-        int resultCode = scheduler.schedule(info);
-        if (resultCode == JobScheduler.RESULT_SUCCESS) {
-            Log.d(TAG, "Job scheduled");
-        } else {
-            Log.d(TAG, "Job scheduling failed");
-        }
-    }
-}
