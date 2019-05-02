@@ -15,6 +15,7 @@ public class ColectJobService extends JobService {
         Log.d(TAG, "Job started");
         Snapshot sa = Snapshot.getInstance(getApplicationContext());
         sa.callSnapShotGroupApis();
+        sa.save();
         return false;
     }
 
