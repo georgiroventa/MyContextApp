@@ -3,10 +3,10 @@ package com.example.georgi.myapplication;
 import java.text.SimpleDateFormat;
 
 public class DateAboutContextUser {
-    public String activityU, headphone;
-    public SimpleDateFormat time;
-    public int humidity, temperature;
-    public float longitude, latitide;
+    private String activityU, headphone;
+    private SimpleDateFormat time;
+    private int humidity, temperature;
+    private float longitude, latitude;
 
     public DateAboutContextUser(){
 
@@ -46,8 +46,8 @@ public class DateAboutContextUser {
         return longitude;
     }
 
-    public float getLatitide() {
-        return latitide;
+    public float getLatitude() {
+        return latitude;
     }
 
     public void setActivityU(String activityU) {
@@ -74,7 +74,7 @@ public class DateAboutContextUser {
         this.longitude = longitude;
     }
 
-    public void setLatitide(float latitide) {
-        this.latitide = latitide;
+    public void setLatitude(float latitude) {
+        this.latitude = latitude;
     }
 }

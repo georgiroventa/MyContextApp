@@ -90,12 +90,6 @@ SnapshotApiActivity extends AppCompatActivity /*implements GoogleApiClient.Conne
 
     String time;
 
-    //text file declarations
-    //private static final String FILE_NAME = "testbb.txt";
-    //FileOutputStream fos = null;
-    //OutputStreamWriter osw;
-
-
     /*public TextView activityName;
     public TextView timeTv;
     public TextView locTv;
@@ -108,6 +102,9 @@ SnapshotApiActivity extends AppCompatActivity /*implements GoogleApiClient.Conne
     public String location;
     public String headphoneStatus;
     public String weather;*/
+    DateAboutContextUser dataUser;
+    public FileOutputStream fos;
+    private static final String FILE_NAME = "cevaa.txt";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -119,6 +116,10 @@ SnapshotApiActivity extends AppCompatActivity /*implements GoogleApiClient.Conne
         //get a database reference
         //database = FirebaseDatabase.getInstance();
         mDatabase = FirebaseDatabase.getInstance().getReference().child("DateAboutContextUser").child(FirebaseAuth.getInstance().getCurrentUser().getUid());
+
+        //instantiate dataUser reference
+        dataUser = new DateAboutContextUser();
+
 
 
         if (mAuth.getCurrentUser() != null) {
@@ -144,7 +145,9 @@ SnapshotApiActivity extends AppCompatActivity /*implements GoogleApiClient.Conne
             time = sa.callSnapShotGroupApis();
 
             //save();
+
             scheduleJob();
+            //startService();
             displayData();
 
         }
@@ -167,41 +170,29 @@ SnapshotApiActivity extends AppCompatActivity /*implements GoogleApiClient.Conne
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String prevChildKey) {
                 //set the activity name
-                TextView activityName = (TextView) findViewById(R.id.probable_activity_name);
-                String activity = dataSnapshot.child("activity").getValue().toString();
-                //String ceva = "esti toanta";
+                TextView activityTv = (TextView) findViewById(R.id.probable_activity_name);
+                String activityDb = dataSnapshot.child("activity").getValue().toString();
+                dataUser.setActivityU(activityDb);
+                activityTv.setText(activityDb);
 
-                activityName.setText(activity);
-                //Log.i("aiciiiiiiiiiii", activity);
-
-                //display the time
-                TextView timeTv = (TextView) findViewById(R.id.probable_activity_time);
-                String time = dataSnapshot.child("time").getValue().toString();
-                timeTv.setText("Time & Date: " + time);
-                //Log.i("aiciiiiii_timp",some);
 
                 //display the location
                 TextView locTv = (TextView) findViewById(R.id.current_latlng);
-                Double longitude = dataSnapshot.child("longitude").getValue(Double.class);
-                Double latitude = dataSnapshot.child("latitude").getValue(Double.class);
-                String location = "Latitude: " + latitude + "\n" +
-                        "Longitude: " + longitude;
-                locTv.setText(location);
-                Log.i("locationnnn", location);
-                // Log.i("aici_longi", String.valueOf(longitude));
+                Double longitudeDb = dataSnapshot.child("longitude").getValue(Double.class);
+                Double latitudeDb = dataSnapshot.child("latitude").getValue(Double.class);
+                String locationDb = "Latitude: " + latitudeDb + "\n" +
+                        "Longitude: " + longitudeDb;
+                locTv.setText(locationDb);
+                Log.i("locationnnn", locationDb);
 
-                //display the status
-                TextView headphoneStatusTv = (TextView)findViewById(R.id.headphone_status);
-                String headphoneStatus = dataSnapshot.child("headphone").getValue().toString();
-                headphoneStatusTv.setText(headphoneStatus);
 
                 //display the weather
                 TextView temperatureTv = (TextView) findViewById(R.id.weather_status);
-                Double temperature = dataSnapshot.child("temperature (°C)").getValue(Double.class);
-                Double humidity = dataSnapshot.child("humidity").getValue(Double.class);
-                String weather = "Temperature: " + temperature + "\nhumidity: " + humidity;
-                temperatureTv.setText(weather);
-                Log.i("aicii_temp", weather);
+                Double temperatureDb = dataSnapshot.child("temperature (°C)").getValue(Double.class);
+                Double humidityDb = dataSnapshot.child("humidity").getValue(Double.class);
+                String weatherDb = "Temperature: " + temperatureDb + "\nhumidity: " + humidityDb;
+                temperatureTv.setText(weatherDb);
+                Log.i("aicii_temp", weatherDb);
 
                 /*
                 try {
@@ -215,11 +206,40 @@ SnapshotApiActivity extends AppCompatActivity /*implements GoogleApiClient.Conne
                     e.printStackTrace();
                 }
                 */
+                //display the time
+                TextView timeTv = (TextView) findViewById(R.id.probable_activity_time);
+                String timeDb = dataSnapshot.child("time").getValue().toString();
+                timeTv.setText("Time & Date: " + timeDb);
+
+                //display the status
+                TextView headphoneStatusTv = (TextView)findViewById(R.id.headphone_status);
+                String headphoneStatusDb = dataSnapshot.child("headphone").getValue().toString();
+                headphoneStatusTv.setText(headphoneStatusDb);
+
+
                 //Load the current map image from Google map
                 String url = "https://maps.googleapis.com/maps/api/staticmap?center="
-                        + longitude + "," + latitude
+                        + longitudeDb + "," + latitudeDb
                         + "&zoom=20&size=400x250&key=" + getString(R.string.google_maps_key);  // key_api = google_maps_key
                 Picasso.with(SnapshotApiActivity.this).load(url).into((ImageView) findViewById(R.id.current_map));
+                try {
+                    fos = openFileOutput(FILE_NAME, MODE_APPEND);
+                    //  Log.i("headphone_context22222", dateAboutContextUser.getHeadphone());
+                   // fos.write(activityDb.getBytes());
+                    fos.write("\n".getBytes());
+                    fos.write(locationDb.getBytes());
+                    fos.write("\n".getBytes());
+                    fos.write(weatherDb.getBytes());
+                    fos.write("\n".getBytes());
+                    fos.write(headphoneStatusDb.getBytes());
+                    fos.write("\n".getBytes());
+                   // fos.write(timeDb.getBytes());
+                    fos.write("\n".getBytes());
+                    fos.close();
+                }  catch (IOException e) {
+                    e.printStackTrace();
+                }
+
             }
 
             @Override
@@ -236,7 +256,6 @@ SnapshotApiActivity extends AppCompatActivity /*implements GoogleApiClient.Conne
         });
 
     }
-
 
 
     //jobScheduler
@@ -257,6 +276,18 @@ SnapshotApiActivity extends AppCompatActivity /*implements GoogleApiClient.Conne
         } else {
             Log.d(TAG, "Job scheduling failed");
         }
+    }
+    public void startService() {
+
+        Intent serviceIntent = new Intent(this, ForegroundService.class);
+        serviceIntent.putExtra("inputExtra", "Application still running");
+
+        ContextCompat.startForegroundService(this, serviceIntent);
+    }
+
+    public void stopService(View v) {
+        Intent serviceIntent = new Intent(this, ForegroundService.class);
+        stopService(serviceIntent);
     }
 
     //check if location is enable, if not open the settings

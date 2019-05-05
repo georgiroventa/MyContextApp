@@ -77,6 +77,15 @@
             android:textAllCaps="false"
             android:textColor="@color/colorText" />
         <Button
+            android:id="@+id/button_noise"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/colorBackground"
+            android:layout_below="@+id/button_settings"
+            android:text="Noise level"
+            android:textAllCaps="false"
+            android:textColor="@color/colorText" />
+        <Button
             android:id="@+id/logoutButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

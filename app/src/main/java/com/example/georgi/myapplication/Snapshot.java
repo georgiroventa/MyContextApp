@@ -79,11 +79,13 @@ public class Snapshot extends AppCompatDialog implements GoogleApiClient.Connect
     private static Context context;
 
     public FileOutputStream fos;
-    private static final String FILE_NAME = "gee.txt";
+    private static final String FILE_NAME = "geenou.txt";
 
-    public DateAboutContextUser dateAboutContextUser = new DateAboutContextUser();
+    public final DateAboutContextUser dateAboutContextUser = new DateAboutContextUser();
 
     private static Snapshot ourInstance = null;
+
+    public static String hpp;
 
     public static Snapshot getInstance(Context context1) {
         context = context1;
@@ -134,6 +136,7 @@ public class Snapshot extends AppCompatDialog implements GoogleApiClient.Connect
         getWeather(timee);
         Log.d(TAG, "Call method API");
 
+        save();
         return timee;
     }
 
@@ -160,22 +163,36 @@ public class Snapshot extends AppCompatDialog implements GoogleApiClient.Connect
                                 + "\nHumidity: " + weather.getHumidity();
                         int temperature = (int) weather.getTemperature(Weather.CELSIUS);
                         //incercare de a scrie in .txt
-                      /*  try {
+                        try {
                             fos = getContext().openFileOutput(FILE_NAME, getContext().MODE_PRIVATE);
-                          //  fos.write(temperature);
+                            fos.write(temperature);
                         } catch (FileNotFoundException e) {
                             e.printStackTrace();
                         } catch (IOException e) {
                             e.printStackTrace();
-                        }*/
+                        }
                         dateAboutContextUser.setTemperature(temperature);
+                        Log.i("temppp_context", String.valueOf(dateAboutContextUser.getTemperature()));
                         int humidity = weather.getHumidity();
+
+                        try {
+                            fos = getContext().openFileOutput(FILE_NAME, getContext().MODE_APPEND);
+                            //  Log.i("headphone_context22222", dateAboutContextUser.getHeadphone());
+                            fos.write(humidity);
+                            fos.write("\n".getBytes());
+                            fos.close();
+                        }  catch (IOException e) {
+                            e.printStackTrace();
+                        }
+
+
                         dateAboutContextUser.setHumidity(humidity);
-                        Log.i("humidity_context", String.valueOf(dateAboutContextUser.humidity));
+                        Log.i("humidity_context", String.valueOf(dateAboutContextUser.getHumidity()));
                         mDatabase.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(timee).child("temperature (°C)").setValue(temperature);
                         mDatabase.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(timee).child("humidity").setValue(humidity);
                     }
                 });
+
     }
 
  /*
@@ -198,7 +215,16 @@ public class Snapshot extends AppCompatDialog implements GoogleApiClient.Connect
                         Location location = locationResult.getLocation();
                         String loc = "Latitudine: "+ location.getLatitude() + ",Longitudine: " + location.getLongitude();
                         float latitude = (float) location.getLatitude();
-                        dateAboutContextUser.setLatitide(latitude);
+                        /* try {
+                              fos = getContext().openFileOutput(FILE_NAME, getContext().MODE_APPEND);
+                                //  Log.i("headphone_context22222", dateAboutContextUser.getHeadphone());
+                                fos.write((int)latitude);
+                                fos.write("\n".getBytes());
+                                fos.close();
+                         }  catch (IOException e) {
+                             e.printStackTrace();
+                         }*/
+                        dateAboutContextUser.setLatitude(latitude);
                         float longitude = (float) location.getLongitude();
                         dateAboutContextUser.setLongitude(longitude);
                         mDatabase.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(timee).child("latitude").setValue(latitude);
@@ -225,16 +251,27 @@ public class Snapshot extends AppCompatDialog implements GoogleApiClient.Connect
                         //get the status
                         String headphoneStatus = headphoneState.getState() == HeadphoneState.PLUGGED_IN ? "Plugged in." : "Unplugged.";
                         //incercare de a scrie in .txt
-                       /* try {
-                            fos = getContext().openFileOutput(FILE_NAME, getContext().MODE_PRIVATE);
-                            //fos.write("telecomanda".getBytes());
-                        } catch (FileNotFoundException e) {
+
+                        try {
+                            fos = getContext().openFileOutput(FILE_NAME, getContext().MODE_APPEND);
+                            //  Log.i("headphone_context22222", dateAboutContextUser.getHeadphone());
+                            fos.write(headphoneStatus.getBytes());
+                            fos.write("\n".getBytes());
+                            fos.close();
+                        }  catch (IOException e) {
                             e.printStackTrace();
-                        }*/
+                        }
+
                         dateAboutContextUser.setHeadphone(headphoneStatus);
+                       // Log.i("georgiiii", dateAboutContextUser.getHeadphone());
                         mDatabase.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(timee).child("headphone").setValue(headphoneStatus);
+
+
                     }
+                    // Log.i("georgiiii", dateAboutContextUser.getHeadphone());
                 });
+       // Log.i("georgiiii2", dateAboutContextUser.getHeadphone());
+       //  Log.i("georgiiii2", hpp);
     }
 
     /*
@@ -264,35 +301,52 @@ public class Snapshot extends AppCompatDialog implements GoogleApiClient.Connect
                                 break;
                             case DetectedActivity.ON_BICYCLE:
                                 //activityName.setText("On bicycle");
+                                //act = "On bicycle";
                                 dateAboutContextUser.setActivityU("On bicycle");
                                 mDatabase.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(timee).child("activity").setValue("On bicycle");
                                 break;
                             case DetectedActivity.ON_FOOT:
                                // activityName.setText("On foot");
+                               // act = "On foot";
                                 dateAboutContextUser.setActivityU("On foot");
                                 mDatabase.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(timee).child("activity").setValue("On foot");
                                 break;
                             case DetectedActivity.RUNNING:
                                // activityName.setText("Running");
+                                //act = "Running";
                                 dateAboutContextUser.setActivityU("Running");
                                mDatabase.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(timee).child("activity").setValue("Running");
                                 break;
                             case DetectedActivity.STILL:
                                 //activityName.setText("Still");
+                                /*
+                                try {
+                                    fos = getContext().openFileOutput(FILE_NAME, getContext().MODE_APPEND);
+                                    //  Log.i("headphone_context22222", dateAboutContextUser.getHeadphone());
+                                    fos.write("Still".getBytes());
+                                    fos.write("\n".getBytes());
+                                    fos.close();
+                                }  catch (IOException e) {
+                                    e.printStackTrace();
+                                }
+                                */
                                 dateAboutContextUser.setActivityU("Still");
                                 mDatabase.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(timee).child("activity").setValue("Still");
                                 break;
                             case DetectedActivity.UNKNOWN:
                                 //activityName.setText("Unknown");
+                                //act = "Unknown";
                                 dateAboutContextUser.setActivityU("Unknown");
                                 mDatabase.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(timee).child("activity").setValue("Unknown");
                                 break;
                             case DetectedActivity.WALKING:
                                 //activityName.setText("Walking");
+                                //act = "Walking";
                                 dateAboutContextUser.setActivityU("Walking");
                                 mDatabase.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(timee).child("activity").setValue("Walking");
                                 break;
                         }
+
                         //set the confidante level
                         //ProgressBar confidenceLevel = (ProgressBar) findViewById(R.id.probable_activity_confidence);
                         //confidenceLevel.setProgress(probableActivity.getConfidence());
@@ -311,7 +365,10 @@ public class Snapshot extends AppCompatDialog implements GoogleApiClient.Connect
         //String text = activityName.getText().toString();
         try {
             fos = getContext().openFileOutput(FILE_NAME, getContext().MODE_APPEND);
-            fos.write("opp".getBytes());
+            Log.i("PROBLEMAAA", dateAboutContextUser.toString());
+          //  Log.i("headphone_context22222", dateAboutContextUser.getHeadphone());
+//            fos.write(dateAboutContextUser.getHeadphone().getBytes());
+       //     fos.write("\n".getBytes());
             fos.close();
         }  catch (IOException e) {
             e.printStackTrace();
