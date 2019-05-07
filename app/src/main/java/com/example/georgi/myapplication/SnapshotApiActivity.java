@@ -20,12 +20,15 @@ import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresPermission;
+import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -71,8 +74,7 @@ import java.util.concurrent.TimeUnit;
 import androidx.work.PeriodicWorkRequest;
 import androidx.work.WorkManager;
 
-public class
-SnapshotApiActivity extends AppCompatActivity /*implements GoogleApiClient.ConnectionCallbacks*/{
+public class SnapshotApiActivity extends AppCompatActivity {
 
 
     private static final String TAG = "SnapshotActivity";
@@ -90,18 +92,7 @@ SnapshotApiActivity extends AppCompatActivity /*implements GoogleApiClient.Conne
 
     String time;
 
-    /*public TextView activityName;
-    public TextView timeTv;
-    public TextView locTv;
-    public TextView headphoneStatusTv;
-    public TextView temperatureTv;*/
-
-
-    /*public String activity;
-    public String some;
-    public String location;
-    public String headphoneStatus;
-    public String weather;*/
+    //text file
     DateAboutContextUser dataUser;
     public FileOutputStream fos;
     private static final String FILE_NAME = "cevaa.txt";
@@ -119,7 +110,6 @@ SnapshotApiActivity extends AppCompatActivity /*implements GoogleApiClient.Conne
 
         //instantiate dataUser reference
         dataUser = new DateAboutContextUser();
-
 
 
         if (mAuth.getCurrentUser() != null) {
@@ -148,7 +138,7 @@ SnapshotApiActivity extends AppCompatActivity /*implements GoogleApiClient.Conne
 
             scheduleJob();
             //startService();
-            displayData();
+            //displayData();
 
         }
     }
@@ -161,85 +151,69 @@ SnapshotApiActivity extends AppCompatActivity /*implements GoogleApiClient.Conne
         FirebaseUser currentUser = mAuth.getCurrentUser();
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        displayData();
+    }
 
     public void displayData(){
         Log.i("display: ", "sunt aici");
         // Attach a listener to read the data at our posts reference
+        /*
+        //varianta cu value event listener
+        mDatabase.addValueEventListener(new ValueEventListener(){
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                //set the activity name
+                TextView activityTv = (TextView) findViewById(R.id.probable_activity_name);
+                String activityDb = dataSnapshot.child("activity").getValue(String.class);
+                Log.i("Georgica", activityDb);
+                dataUser.setActivityU(activityDb);
+                activityTv.setText(activityDb);
+            }
 
-        mDatabase.orderByKey().limitToLast(1).addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                // Getting Post failed, log a message
+                Log.w(TAG, "loadPost:onCancelled", databaseError.toException());
+                // ...
+            }
+        });
+*/
+        /*mDatabase.child(time).child("activity").addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String prevChildKey) {
                 //set the activity name
                 TextView activityTv = (TextView) findViewById(R.id.probable_activity_name);
                 String activityDb = dataSnapshot.child("activity").getValue().toString();
+                Log.i("Georgica", activityDb);
                 dataUser.setActivityU(activityDb);
                 activityTv.setText(activityDb);
+            }
 
+            @Override
+            public void onChildChanged(DataSnapshot dataSnapshot, String prevChildKey) {}
 
+            @Override
+            public void onChildRemoved(DataSnapshot dataSnapshot) {}
+
+            @Override
+            public void onChildMoved(DataSnapshot dataSnapshot, String prevChildKey) {}
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {}
+        });
+        */
+/*
+        mDatabase.child(time).child("longitude").addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(DataSnapshot dataSnapshot, String prevChildKey) {
                 //display the location
-                TextView locTv = (TextView) findViewById(R.id.current_latlng);
+                TextView longitudeTv = (TextView) findViewById(R.id.longitude_status);
                 Double longitudeDb = dataSnapshot.child("longitude").getValue(Double.class);
-                Double latitudeDb = dataSnapshot.child("latitude").getValue(Double.class);
-                String locationDb = "Latitude: " + latitudeDb + "\n" +
-                        "Longitude: " + longitudeDb;
-                locTv.setText(locationDb);
-                Log.i("locationnnn", locationDb);
-
-
-                //display the weather
-                TextView temperatureTv = (TextView) findViewById(R.id.weather_status);
-                Double temperatureDb = dataSnapshot.child("temperature (°C)").getValue(Double.class);
-                Double humidityDb = dataSnapshot.child("humidity").getValue(Double.class);
-                String weatherDb = "Temperature: " + temperatureDb + "\nhumidity: " + humidityDb;
-                temperatureTv.setText(weatherDb);
-                Log.i("aicii_temp", weatherDb);
-
-                /*
-                try {
-                    fos = openFileOutput(FILE_NAME, MODE_PRIVATE);
-                    osw = new OutputStreamWriter(fos);
-                   // osw.append(activity).append(time).append(location).append(headphoneStatus).append(weather);
-                    osw.close();
-                    Log.i("Saved to ", getFilesDir() + "/" + FILE_NAME);
-
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-                */
-                //display the time
-                TextView timeTv = (TextView) findViewById(R.id.probable_activity_time);
-                String timeDb = dataSnapshot.child("time").getValue().toString();
-                timeTv.setText("Time & Date: " + timeDb);
-
-                //display the status
-                TextView headphoneStatusTv = (TextView)findViewById(R.id.headphone_status);
-                String headphoneStatusDb = dataSnapshot.child("headphone").getValue().toString();
-                headphoneStatusTv.setText(headphoneStatusDb);
-
-
-                //Load the current map image from Google map
-                String url = "https://maps.googleapis.com/maps/api/staticmap?center="
-                        + longitudeDb + "," + latitudeDb
-                        + "&zoom=20&size=400x250&key=" + getString(R.string.google_maps_key);  // key_api = google_maps_key
-                Picasso.with(SnapshotApiActivity.this).load(url).into((ImageView) findViewById(R.id.current_map));
-                try {
-                    fos = openFileOutput(FILE_NAME, MODE_APPEND);
-                    //  Log.i("headphone_context22222", dateAboutContextUser.getHeadphone());
-                   // fos.write(activityDb.getBytes());
-                    fos.write("\n".getBytes());
-                    fos.write(locationDb.getBytes());
-                    fos.write("\n".getBytes());
-                    fos.write(weatherDb.getBytes());
-                    fos.write("\n".getBytes());
-                    fos.write(headphoneStatusDb.getBytes());
-                    fos.write("\n".getBytes());
-                   // fos.write(timeDb.getBytes());
-                    fos.write("\n".getBytes());
-                    fos.close();
-                }  catch (IOException e) {
-                    e.printStackTrace();
-                }
-
+                longitudeTv.setText(longitudeDb + "");
+               // Log.i("locationnnn", locationDb);
             }
 
             @Override
@@ -255,7 +229,193 @@ SnapshotApiActivity extends AppCompatActivity /*implements GoogleApiClient.Conne
             public void onCancelled(DatabaseError databaseError) {}
         });
 
+        mDatabase.child(time).child("latitude").addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(DataSnapshot dataSnapshot, String prevChildKey) {
+                //display the location
+                TextView latitudeTv = (TextView) findViewById(R.id.latitude_status);
+                Double latitudeDb = dataSnapshot.child("latitude").getValue(Double.class);
+                Double longitudeDb = dataSnapshot.child("latitude").getValue(Double.class);
+                latitudeTv.setText(latitudeDb + "");
+                //Load the current map image from Google map
+                String url = "https://maps.googleapis.com/maps/api/staticmap?center="
+                        + longitudeDb + "," + latitudeDb
+                        + "&zoom=20&size=400x250&key=" + getString(R.string.google_maps_key);  // key_api = google_maps_key
+                Picasso.with(SnapshotApiActivity.this).load(url).into((ImageView) findViewById(R.id.current_map));
+            }
+
+            @Override
+            public void onChildChanged(DataSnapshot dataSnapshot, String prevChildKey) {}
+
+            @Override
+            public void onChildRemoved(DataSnapshot dataSnapshot) {}
+
+            @Override
+            public void onChildMoved(DataSnapshot dataSnapshot, String prevChildKey) {}
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {}
+        });
+
+        mDatabase.child(time).child("time").addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(DataSnapshot dataSnapshot, String prevChildKey) {
+                //display the time
+                TextView timeTv = (TextView) findViewById(R.id.probable_activity_time);
+                String timeDb = dataSnapshot.child("time").getValue().toString();
+                timeTv.setText("Time & Date: " + timeDb);
+            }
+
+            @Override
+            public void onChildChanged(DataSnapshot dataSnapshot, String prevChildKey) {}
+
+            @Override
+            public void onChildRemoved(DataSnapshot dataSnapshot) {}
+
+            @Override
+            public void onChildMoved(DataSnapshot dataSnapshot, String prevChildKey) {}
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {}
+        });
+
+        mDatabase.child(time).child("temperature").addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(DataSnapshot dataSnapshot, String prevChildKey) {
+                //display the weather
+                TextView temperatureTv = (TextView) findViewById(R.id.temperature_status);
+                Double temperatureDb = dataSnapshot.child("temperature (°C)").getValue(Double.class);
+                Double humidityDb = dataSnapshot.child("humidity").getValue(Double.class);
+                temperatureTv.setText(temperatureDb + "");
+               // Log.i("aicii_temp", weatherDb);
+            }
+
+            @Override
+            public void onChildChanged(DataSnapshot dataSnapshot, String prevChildKey) {}
+
+            @Override
+            public void onChildRemoved(DataSnapshot dataSnapshot) {}
+
+            @Override
+            public void onChildMoved(DataSnapshot dataSnapshot, String prevChildKey) {}
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {}
+        });
+
+        mDatabase.child(time).child("humidity").addValueEventListener()
+        mDatabase.child(time).child("humidity").addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(DataSnapshot dataSnapshot, String prevChildKey) {
+                //display the weather
+                TextView humidityTv = (TextView) findViewById(R.id.humidity_status);
+                Double humidityDb = dataSnapshot.child("humidity").getValue(Double.class);
+                humidityTv.setText("Humidity: "+ humidityDb);
+            }
+
+            @Override
+            public void onChildChanged(DataSnapshot dataSnapshot, String prevChildKey) {}
+
+            @Override
+            public void onChildRemoved(DataSnapshot dataSnapshot) {}
+
+            @Override
+            public void onChildMoved(DataSnapshot dataSnapshot, String prevChildKey) {}
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {}
+        });
+
+        mDatabase.child(time).child("headphone").orderByKey().addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(DataSnapshot dataSnapshot, String prevChildKey) {
+                //display the status headphone
+                TextView headphoneStatusTv = (TextView)findViewById(R.id.headphone_status);
+                String headphoneStatusDb = dataSnapshot.child("headphone").getValue().toString();
+                headphoneStatusTv.setText(headphoneStatusDb);
+
+            }
+
+            @Override
+            public void onChildChanged(DataSnapshot dataSnapshot, String prevChildKey) {}
+
+            @Override
+            public void onChildRemoved(DataSnapshot dataSnapshot) {}
+
+            @Override
+            public void onChildMoved(DataSnapshot dataSnapshot, String prevChildKey) {}
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {}
+        });
+*/
+
+
+            mDatabase.orderByKey().limitToLast(1).addChildEventListener(new ChildEventListener() {
+                @Override
+                public void onChildAdded(DataSnapshot dataSnapshot, String prevChildKey) {
+                    //set the activity name
+                    TextView activityTv = (TextView) findViewById(R.id.probable_activity_name);
+                    String activityDb = dataSnapshot.child("activity").getValue().toString();
+                    dataUser.setActivityU(activityDb);
+                    activityTv.setText(activityDb);
+
+                    //display the location
+                    TextView longitudeTv = (TextView) findViewById(R.id.longitude_status);
+                    Double longitudeDb = dataSnapshot.child("longitude").getValue(Double.class);
+                    String longitudeSt = longitudeDb + "";
+                    Log.i("Aiciiiiiiiiiiii", longitudeSt);
+                    longitudeTv.setText("Longitudine: " + longitudeDb);
+                    TextView latitudeTv = (TextView) findViewById(R.id.latitude_status);
+                    Double latitudeDb = dataSnapshot.child("latitude").getValue(Double.class);
+                    latitudeTv.setText("Latitudine: " + latitudeDb);
+
+                    //display the weather
+                    TextView humidityTv = (TextView) findViewById(R.id.humidity_status);
+                    Double humidityDb = dataSnapshot.child("humidity").getValue(Double.class);
+                    humidityTv.setText("Humidity: " + humidityDb);
+                    TextView temperatureTv = (TextView) findViewById(R.id.temperature_status);
+                    Double temperatureDb = dataSnapshot.child("temperature (°C)").getValue(Double.class);
+                    temperatureTv.setText("Temperature: " + temperatureDb);
+
+                    //display the time
+                    TextView timeTv = (TextView) findViewById(R.id.probable_activity_time);
+                    String timeDb = dataSnapshot.child("time").getValue().toString();
+                    timeTv.setText("Time & Date: " + timeDb);
+
+                    //display the status
+                    TextView headphoneStatusTv = (TextView)findViewById(R.id.headphone_status);
+     //               String headphoneStatusDb = dataSnapshot.child("headphone").getValue().toString();
+       //             headphoneStatusTv.setText(headphoneStatusDb);
+
+
+                    //Load the current map image from Google map
+                    String url = "https://maps.googleapis.com/maps/api/staticmap?center="
+                            + longitudeDb + "," + latitudeDb
+                            + "&zoom=20&size=400x250&key=" + getString(R.string.google_maps_key);  // key_api = google_maps_key
+                    Picasso.with(SnapshotApiActivity.this).load(url).into((ImageView) findViewById(R.id.current_map));
+
+                }
+
+                @Override
+                public void onChildChanged(DataSnapshot dataSnapshot, String prevChildKey) {}
+
+                @Override
+                public void onChildRemoved(DataSnapshot dataSnapshot) {}
+
+                @Override
+                public void onChildMoved(DataSnapshot dataSnapshot, String prevChildKey) {}
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {}
+            });
+
     }
+
+
+
+
+
 
 
     //jobScheduler
@@ -277,6 +437,7 @@ SnapshotApiActivity extends AppCompatActivity /*implements GoogleApiClient.Conne
             Log.d(TAG, "Job scheduling failed");
         }
     }
+
     public void startService() {
 
         Intent serviceIntent = new Intent(this, ForegroundService.class);
@@ -325,3 +486,39 @@ SnapshotApiActivity extends AppCompatActivity /*implements GoogleApiClient.Conne
         finish();
     }
 }
+
+
+
+//scriere in fisier
+/*
+try {
+                    fos = openFileOutput(FILE_NAME, MODE_APPEND);
+                    //  Log.i("headphone_context22222", dateAboutContextUser.getHeadphone());
+                    // fos.write(activityDb.getBytes());
+                    fos.write("\n".getBytes());
+                    fos.write(locationDb.getBytes());
+                    fos.write("\n".getBytes());
+                    fos.write(weatherDb.getBytes());
+                    fos.write("\n".getBytes());
+                    fos.write(headphoneStatusDb.getBytes());
+                    fos.write("\n".getBytes());
+                    // fos.write(timeDb.getBytes());
+                    fos.write("\n".getBytes());
+                    fos.close();
+                }  catch (IOException e) {
+                    e.printStackTrace();
+                }
+*/
+
+ /*
+                try {
+                    fos = openFileOutput(FILE_NAME, MODE_PRIVATE);
+                    osw = new OutputStreamWriter(fos);
+                   // osw.append(activity).append(time).append(location).append(headphoneStatus).append(weather);
+                    osw.close();
+                    Log.i("Saved to ", getFilesDir() + "/" + FILE_NAME);
+
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+  */

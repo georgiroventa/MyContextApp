@@ -7,4 +7,6 @@
     <color name="colorHint">#030711</color>
     <color name="colorBackground">#e2dfd0</color>
     <color name="colorButtonTransparent">#be050505</color>
+    <color name="colorWhite">#fff</color>
+    <color name="colorGrey">#c3c3c3 </color>
 </resources>

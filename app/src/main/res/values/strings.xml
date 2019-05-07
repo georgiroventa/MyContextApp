@@ -21,4 +21,6 @@
     <string name="error_wrong_password">error_wrong_password</string>
     <string name="title_activity_maps">Map</string>
     <string name="stopped">stopped...</string>
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
 </resources>

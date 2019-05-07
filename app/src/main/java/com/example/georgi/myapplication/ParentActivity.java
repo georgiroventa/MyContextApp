@@ -10,8 +10,11 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -32,15 +35,13 @@ public class ParentActivity extends AppCompatActivity
     private FirebaseDatabase database;
     private DatabaseReference mDatabase;
     private static final int GET_PERMISSION_REQUEST_CODE = 1;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_parent);
 
-
         mAuth = FirebaseAuth.getInstance();
-        String password;
-        String email;
         database = FirebaseDatabase.getInstance();
         mDatabase = database.getReference().child("DateAboutContextUser");
 
@@ -106,6 +107,7 @@ public class ParentActivity extends AppCompatActivity
             });
 
         }
+
     }
     @Override
     public void onStart() {
@@ -140,6 +142,8 @@ public class ParentActivity extends AppCompatActivity
         //}
 
     }
+
+
     @Override
     public void onBackPressed() {
         new AlertDialog.Builder(this)
@@ -153,5 +157,6 @@ public class ParentActivity extends AppCompatActivity
                     }
                 }).create().show();
     }
+
 
 }

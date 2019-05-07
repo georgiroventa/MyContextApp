@@ -9,12 +9,16 @@ import android.location.LocationManager;
 import android.os.Build;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
+import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.google.android.gms.awareness.Awareness;
@@ -53,6 +57,45 @@ public class RequestActivity extends AppCompatActivity {
                 String time = "Current Time: " + format.format(calendar.getTime());
                 t1.setText(time);
 
+            }
+        });
+
+        //bottom navigation view
+        BottomNavigationView bottomNavigationView = (BottomNavigationView) findViewById(R.id.bottomNavView_Bar);
+        Menu menu = bottomNavigationView.getMenu();
+        MenuItem menuItem = menu.getItem(0);
+        menuItem.setChecked(true);
+
+        bottomNavigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
+            @Override
+            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+                switch (item.getItemId()){
+
+                    case R.id.nav_home:
+                        Intent intent0 = new Intent(RequestActivity.this, ParentActivity.class);
+                        startActivity(intent0);
+                        break;
+                    case R.id.nav_map:
+                        Intent intent1 = new Intent(RequestActivity.this, MapsActivity.class);
+                        startActivity(intent1);
+                        break;
+                    case R.id.nav_noise:
+                        Intent intent2 = new Intent(RequestActivity.this, NoiseLevelActivity.class);
+                        startActivity(intent2);
+                        break;
+                    case R.id.nav_coordinates:
+
+                        break;
+
+                    case R.id.nav_notification:
+                        Intent intent4 = new Intent(RequestActivity.this, NotificationsActivity.class);
+                        startActivity(intent4);
+                        break;
+
+                }
+
+
+                return false;
             }
         });
 

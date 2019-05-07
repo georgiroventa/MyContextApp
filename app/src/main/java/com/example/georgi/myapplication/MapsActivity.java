@@ -12,10 +12,17 @@ import android.location.LocationManager;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -41,12 +48,13 @@ import com.google.android.gms.maps.model.PolylineOptions;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import com.example.georgi.myapplication.Modules.DirectionFinder;
 import com.example.georgi.myapplication.Modules.DirectionFinderListener;
 import com.example.georgi.myapplication.Modules.Route;
 
-public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, DirectionFinderListener, GoogleApiClient.ConnectionCallbacks {
+public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback, DirectionFinderListener, GoogleApiClient.ConnectionCallbacks {
 
     private GoogleMap mMap;
     private Button btnFindPath;
@@ -86,6 +94,47 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             }
         });
         */
+
+        BottomNavigationView bottomNavigationView = (BottomNavigationView) findViewById(R.id.bottomNavView_Bar);
+        Menu menu = bottomNavigationView.getMenu();
+        MenuItem menuItem = menu.getItem(0);
+        menuItem.setChecked(true);
+
+        bottomNavigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
+            @Override
+            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+                switch (item.getItemId()){
+
+                    case R.id.nav_home:
+                        Intent intent0 = new Intent(MapsActivity.this, ParentActivity.class);
+                        startActivity(intent0);
+                        break;
+                    case R.id.nav_map:
+
+                        break;
+                    case R.id.nav_noise:
+                        Intent intent2 = new Intent(MapsActivity.this, NoiseLevelActivity.class);
+                        startActivity(intent2);
+                        break;
+                    case R.id.nav_coordinates:
+                        Intent intent3 = new Intent(MapsActivity.this, RequestActivity.class);
+                        startActivity(intent3);
+                        break;
+
+
+
+                    case R.id.nav_notification:
+                        Intent intent4 = new Intent(MapsActivity.this, NotificationsActivity.class);
+                        startActivity(intent4);
+                        break;
+
+                }
+
+
+                return false;
+            }
+        });
+
         //awareness some try
 
         mClient = new GoogleApiClient.Builder(this)
@@ -132,7 +181,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             return;
         }
         locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 5000, 0, listener);
-
     }
     private void sendRequest() {
         String origin = etOrigin.getText().toString();
