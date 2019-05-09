@@ -4,7 +4,7 @@ import java.text.SimpleDateFormat;
 
 public class DateAboutContextUser {
     private String activityU, headphone;
-    private SimpleDateFormat time;
+    private long time;
     private int humidity, temperature;
     private float longitude, latitude;
 
@@ -30,7 +30,7 @@ public class DateAboutContextUser {
         return headphone;
     }
 
-    public SimpleDateFormat getTime() {
+    public long getTime() {
         return time;
     }
 
@@ -58,7 +58,7 @@ public class DateAboutContextUser {
         this.headphone = headphone;
     }
 
-    public void setTime(SimpleDateFormat time) {
+    public void setTimeSeconds(long time) {
         this.time = time;
     }
 

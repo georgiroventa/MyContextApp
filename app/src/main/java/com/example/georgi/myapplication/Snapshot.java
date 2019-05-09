@@ -81,11 +81,20 @@ public class Snapshot extends AppCompatDialog implements GoogleApiClient.Connect
     public FileOutputStream fos;
     private static final String FILE_NAME = "test.csv";
 
-    public DateAboutContextUser dateAboutContextUser = new DateAboutContextUser();
+    int flag = 0x00;
+    final int bit1 = 0x01;
+    final int bit2 = 0x02;
+    final int bit3 = 0x04;
+    final int bit4 = 0x08;
+    final int bit5 = 0x10;
+
+    DateAboutContextUser dateAboutContextUser = new DateAboutContextUser();
+
+    String timee;
+
 
     private static Snapshot ourInstance = null;
 
-    public static String hpp;
 
     public static Snapshot getInstance(Context context1) {
         context = context1;
@@ -117,35 +126,24 @@ public class Snapshot extends AppCompatDialog implements GoogleApiClient.Connect
     }
 
     public String callSnapShotGroupApis() {
-        buildApiClient();
-        //display the time
         Calendar calendar = Calendar.getInstance();
         SimpleDateFormat format = new SimpleDateFormat("EEEE, dd-MM-yyyy 'at' hh:mm:ss a ");
-        String timee = format.format(calendar.getTime());
-
-        try {
-            fos = getContext().openFileOutput(FILE_NAME, getContext().MODE_APPEND);
-            fos.write("activity,time,headphoneStatus,latitude,longitude,humidity,temperature".getBytes());
-            fos.write("\n".getBytes());
-            fos.close();
-        }  catch (IOException e) {
-            e.printStackTrace();
-        }
+        timee = format.format(calendar.getTime());
+        buildApiClient();
 
         //get info about user's current activity
-        getCurrentActivity(timee);
+        getCurrentActivity();
 
         //get the current state of the headphones.
-        getHeadphoneStatus(timee);
+        getHeadphoneStatus();
 
         //get current location.
-        getLocation(timee);
+        getLocation();
 
         //get current weather conditions.
-        getWeather(timee);
+        getWeather();
         Log.d(TAG, "Call method API");
 
-        //save();
         return timee;
     }
 
@@ -154,7 +152,7 @@ public class Snapshot extends AppCompatDialog implements GoogleApiClient.Connect
       Get the current weather condition at current location.
      */
     //@RequiresPermission("android.permission.ACCESS_FINE_LOCATION")
-    private void getWeather(final String timee) {
+    private void getWeather() {
         //noinspection MissingPermission
         Awareness.SnapshotApi.getWeather(mGoogleApiClient)
                 .setResultCallback(new ResultCallback<WeatherResult>() {
@@ -171,27 +169,17 @@ public class Snapshot extends AppCompatDialog implements GoogleApiClient.Connect
                         String weatherReport = "Temperature: " + weather.getTemperature(Weather.CELSIUS)
                                 + "\nHumidity: " + weather.getHumidity();
                         int temperature = (int) weather.getTemperature(Weather.CELSIUS);
-                        //incercare de a scrie in .csv
                         dateAboutContextUser.setTemperature(temperature);
                         Log.i("temppp_context", String.valueOf(dateAboutContextUser.getTemperature()));
                         int humidity = weather.getHumidity();
 
-                        try {
-                            fos = getContext().openFileOutput(FILE_NAME, getContext().MODE_APPEND);
-                            fos.write(String.valueOf(humidity).getBytes());
-                            fos.write(",".getBytes());
-                            fos.write(String.valueOf(temperature).getBytes());
-                            fos.write("\n".getBytes());
-                            fos.close();
-                        }  catch (IOException e) {
-                            e.printStackTrace();
-                        }
-
 
                         dateAboutContextUser.setHumidity(humidity);
+                        flag = flag | bit1;
                         Log.i("humidity_context", String.valueOf(dateAboutContextUser.getHumidity()));
-                        mDatabase.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(timee).child("temperature (°C)").setValue(temperature);
-                        mDatabase.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(timee).child("humidity").setValue(humidity);
+                        save();
+                        //mDatabase.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(timee).child("temperature (°C)").setValue(temperature);
+                        //mDatabase.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(timee).child("humidity").setValue(humidity);
                     }
                 });
 
@@ -202,7 +190,7 @@ public class Snapshot extends AppCompatDialog implements GoogleApiClient.Connect
      */
     //@RequiresPermission("android.permission.ACCESS_FINE_LOCATION")
 
-    private void getLocation(final String timee) {
+    private void getLocation() {
         //noinspection MissingPermission
         Awareness.SnapshotApi.getLocation(mGoogleApiClient)
                 .setResultCallback(new ResultCallback<LocationResult>() {
@@ -220,18 +208,10 @@ public class Snapshot extends AppCompatDialog implements GoogleApiClient.Connect
                         dateAboutContextUser.setLatitude(latitude);
                         float longitude = (float) location.getLongitude();
                         dateAboutContextUser.setLongitude(longitude);
-                        try {
-                            fos = getContext().openFileOutput(FILE_NAME, getContext().MODE_APPEND);
-                            fos.write(String.valueOf(latitude).getBytes());
-                            fos.write(",".getBytes());
-                            fos.write(String.valueOf(longitude).getBytes());
-                            fos.write(",".getBytes());
-                            fos.close();
-                        }  catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                        mDatabase.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(timee).child("latitude").setValue(latitude);
-                        mDatabase.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(timee).child("longitude").setValue(longitude);
+                        flag = flag | bit2;
+                        save();
+                        //mDatabase.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(timee).child("latitude").setValue(latitude);
+                        //mDatabase.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(timee).child("longitude").setValue(longitude);
                     }
                 });
     }
@@ -240,7 +220,7 @@ public class Snapshot extends AppCompatDialog implements GoogleApiClient.Connect
       Check whether the headphones are plugged in or not? This is under snapshot api category.
      */
 
-    private void getHeadphoneStatus(final String timee) {
+    private void getHeadphoneStatus() {
         Awareness.SnapshotApi.getHeadphoneState(mGoogleApiClient)
                 .setResultCallback(new ResultCallback<HeadphoneStateResult>() {
                     @Override
@@ -253,26 +233,15 @@ public class Snapshot extends AppCompatDialog implements GoogleApiClient.Connect
 
                         //get the status
                         String headphoneStatus = headphoneState.getState() == HeadphoneState.PLUGGED_IN ? "Plugged in" : "Unplugged";
-                        //incercare de a scrie in .txt
-                        try {
-                            fos = getContext().openFileOutput(FILE_NAME, getContext().MODE_APPEND);
-                            fos.write(headphoneStatus.getBytes());
-                            fos.write(",".getBytes());
-                            fos.close();
-                        }  catch (IOException e) {
-                            e.printStackTrace();
-                        }
-
                         dateAboutContextUser.setHeadphone(headphoneStatus);
+                        flag = flag | bit3;
+                        save();
                        // Log.i("georgiiii", dateAboutContextUser.getHeadphone());
-                        mDatabase.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(timee).child("headphone").setValue(headphoneStatus);
+                       // mDatabase.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(timee).child("headphone").setValue(headphoneStatus);
 
 
                     }
-                    // Log.i("georgiiii", dateAboutContextUser.getHeadphone());
                 });
-       // Log.i("georgiiii2", dateAboutContextUser.getHeadphone());
-       //  Log.i("georgiiii2", hpp);
     }
 
     /*
@@ -280,7 +249,7 @@ public class Snapshot extends AppCompatDialog implements GoogleApiClient.Connect
       Current activity and confidence level will be displayed on the screen.
      */
 
-    private void getCurrentActivity(final  String timee) {
+    private void getCurrentActivity() {
         Awareness.SnapshotApi.getDetectedActivity(mGoogleApiClient)
                 .setResultCallback(new ResultCallback<DetectedActivityResult>() {
                     @Override
@@ -293,94 +262,77 @@ public class Snapshot extends AppCompatDialog implements GoogleApiClient.Connect
                         DetectedActivity probableActivity = ar.getMostProbableActivity();
 
                         //set the activity name
-                        //TextView activityName = (TextView) findViewById(R.id.probable_activity_name);
                         switch (probableActivity.getType()) {
                             case DetectedActivity.IN_VEHICLE:
-                                //activityName.setText("In vehicle");
                                 dateAboutContextUser.setActivityU("In vehicle");
-                                mDatabase.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(timee).child("activity").setValue("In vehicle");
+                                flag = flag | bit4;
+                               // mDatabase.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(timee).child("activity").setValue("In vehicle");
                                 break;
+
                             case DetectedActivity.ON_BICYCLE:
-                                //activityName.setText("On bicycle");
-                                //act = "On bicycle";
                                 dateAboutContextUser.setActivityU("On bicycle");
-                                mDatabase.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(timee).child("activity").setValue("On bicycle");
+                                //mDatabase.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(timee).child("activity").setValue("On bicycle");
+                                flag = flag | bit4;
                                 break;
+
                             case DetectedActivity.ON_FOOT:
-                               // activityName.setText("On foot");
-                               // act = "On foot";
                                 dateAboutContextUser.setActivityU("On foot");
-                                mDatabase.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(timee).child("activity").setValue("On foot");
+                                //mDatabase.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(timee).child("activity").setValue("On foot");
+                                flag = flag | bit4;
                                 break;
+
                             case DetectedActivity.RUNNING:
-                               // activityName.setText("Running");
-                                //act = "Running";
                                 dateAboutContextUser.setActivityU("Running");
-                               mDatabase.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(timee).child("activity").setValue("Running");
+                                //mDatabase.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(timee).child("activity").setValue("Running");
+                                flag = flag | bit4;
                                 break;
+
                             case DetectedActivity.STILL:
-                                //activityName.setText("Still");
-                                /*
-                                try {
-                                    fos = getContext().openFileOutput(FILE_NAME, getContext().MODE_APPEND);
-                                    //  Log.i("headphone_context22222", dateAboutContextUser.getHeadphone());
-                                    fos.write("Still".getBytes());
-                                    fos.write("\n".getBytes());
-                                    fos.close();
-                                }  catch (IOException e) {
-                                    e.printStackTrace();
-                                }
-                                */
                                 dateAboutContextUser.setActivityU("Still");
-                                mDatabase.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(timee).child("activity").setValue("Still");
+                                //mDatabase.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(timee).child("activity").setValue("Still");
+                                flag = flag | bit4;
                                 break;
+
                             case DetectedActivity.UNKNOWN:
-                                //activityName.setText("Unknown");
-                                //act = "Unknown";
                                 dateAboutContextUser.setActivityU("Unknown");
-                                mDatabase.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(timee).child("activity").setValue("Unknown");
+                                //mDatabase.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(timee).child("activity").setValue("Unknown");
+                                flag = flag | bit4;
                                 break;
+
                             case DetectedActivity.WALKING:
-                                //activityName.setText("Walking");
-                                //act = "Walking";
                                 dateAboutContextUser.setActivityU("Walking");
-                                mDatabase.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(timee).child("activity").setValue("Walking");
+                                flag = flag | bit4;
+                                //mDatabase.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(timee).child("activity").setValue("Walking");
                                 break;
                         }
 
-                        //set the confidante level
-                        //ProgressBar confidenceLevel = (ProgressBar) findViewById(R.id.probable_activity_confidence);
-                        //confidenceLevel.setProgress(probableActivity.getConfidence());
-
-                        //display the time
-                        //TextView timeTv = (TextView) findViewById(R.id.probable_activity_time);
+                        //get the time
                         SimpleDateFormat sdf = new SimpleDateFormat(" hh:mm:ss a ", Locale.getDefault());
-                        //timeTv.setText("Time & Date: " + sdf.format(new Date(ar.getTime())));
-                        dateAboutContextUser.setTime(sdf);
-                        try {
-                            fos = getContext().openFileOutput(FILE_NAME, getContext().MODE_APPEND);
-                            fos.write(sdf.format(new Date(ar.getTime())).getBytes());
-                            fos.write(",".getBytes());
-                            fos.close();
-                        }  catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                        mDatabase.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(timee).child("time").setValue(sdf.format(new Date(ar.getTime())));
+                        Calendar calendar = Calendar.getInstance();
+                        long data = calendar.getTimeInMillis() / 1000;
+                        dateAboutContextUser.setTimeSeconds(data);
+                        flag = flag | bit5;
+                        save();
+                        //mDatabase.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(timee).child("time").setValue(sdf);
                     }
                 });
     }
 
     public void save () {
-        //String text = activityName.getText().toString();
-        try {
-            fos = getContext().openFileOutput(FILE_NAME, getContext().MODE_APPEND);
+        Log.i("Flag", String.valueOf(flag));
+        if( flag == 31 ){
+            mDatabase.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(timee).child("temperature (°C)").setValue(dateAboutContextUser.getTemperature());
+            mDatabase.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(timee).child("humidity").setValue(dateAboutContextUser.getHumidity());
+            mDatabase.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(timee).child("latitude").setValue(dateAboutContextUser.getLatitude());
+            mDatabase.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(timee).child("longitude").setValue(dateAboutContextUser.getLongitude());
+            mDatabase.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(timee).child("headphone").setValue(dateAboutContextUser.getHeadphone());
+            mDatabase.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(timee).child("activity").setValue(dateAboutContextUser.getActivityU());
+            mDatabase.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(timee).child("time").setValue(dateAboutContextUser.getTime());
+            flag = 0x00;
+        }
+        else
+        {
 
-           Log.i("headphone_context22222", dateAboutContextUser.getHeadphone());
-//            fos.write(dateAboutContextUser.getHeadphone().getBytes());
-       //     fos.write("\n".getBytes());
-            fos.close();
-        }  catch (IOException e) {
-            e.printStackTrace();
         }
     }
 
@@ -398,4 +350,17 @@ public class Snapshot extends AppCompatDialog implements GoogleApiClient.Connect
     }
 
 }
+
+//scrie in csv
+
+                        /*try {
+                            fos = getContext().openFileOutput(FILE_NAME, getContext().MODE_APPEND);
+                            fos.write(String.valueOf(humidity).getBytes());
+                            fos.write(",".getBytes());
+                            fos.write(String.valueOf(temperature).getBytes());
+                            fos.write("\n".getBytes());
+                            fos.close();
+                        }  catch (IOException e) {
+                            e.printStackTrace();
+                        }*/
 

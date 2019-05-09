@@ -138,7 +138,7 @@ public class SnapshotApiActivity extends AppCompatActivity {
 
             scheduleJob();
             //startService();
-            //displayData();
+            displayData();
 
         }
     }
@@ -151,205 +151,9 @@ public class SnapshotApiActivity extends AppCompatActivity {
         FirebaseUser currentUser = mAuth.getCurrentUser();
     }
 
-    @Override
-    public void onResume() {
-        super.onResume();
-        displayData();
-    }
 
     public void displayData(){
         Log.i("display: ", "sunt aici");
-        // Attach a listener to read the data at our posts reference
-        /*
-        //varianta cu value event listener
-        mDatabase.addValueEventListener(new ValueEventListener(){
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                //set the activity name
-                TextView activityTv = (TextView) findViewById(R.id.probable_activity_name);
-                String activityDb = dataSnapshot.child("activity").getValue(String.class);
-                Log.i("Georgica", activityDb);
-                dataUser.setActivityU(activityDb);
-                activityTv.setText(activityDb);
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                // Getting Post failed, log a message
-                Log.w(TAG, "loadPost:onCancelled", databaseError.toException());
-                // ...
-            }
-        });
-*/
-        /*mDatabase.child(time).child("activity").addChildEventListener(new ChildEventListener() {
-            @Override
-            public void onChildAdded(DataSnapshot dataSnapshot, String prevChildKey) {
-                //set the activity name
-                TextView activityTv = (TextView) findViewById(R.id.probable_activity_name);
-                String activityDb = dataSnapshot.child("activity").getValue().toString();
-                Log.i("Georgica", activityDb);
-                dataUser.setActivityU(activityDb);
-                activityTv.setText(activityDb);
-            }
-
-            @Override
-            public void onChildChanged(DataSnapshot dataSnapshot, String prevChildKey) {}
-
-            @Override
-            public void onChildRemoved(DataSnapshot dataSnapshot) {}
-
-            @Override
-            public void onChildMoved(DataSnapshot dataSnapshot, String prevChildKey) {}
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {}
-        });
-        */
-/*
-        mDatabase.child(time).child("longitude").addChildEventListener(new ChildEventListener() {
-            @Override
-            public void onChildAdded(DataSnapshot dataSnapshot, String prevChildKey) {
-                //display the location
-                TextView longitudeTv = (TextView) findViewById(R.id.longitude_status);
-                Double longitudeDb = dataSnapshot.child("longitude").getValue(Double.class);
-                longitudeTv.setText(longitudeDb + "");
-               // Log.i("locationnnn", locationDb);
-            }
-
-            @Override
-            public void onChildChanged(DataSnapshot dataSnapshot, String prevChildKey) {}
-
-            @Override
-            public void onChildRemoved(DataSnapshot dataSnapshot) {}
-
-            @Override
-            public void onChildMoved(DataSnapshot dataSnapshot, String prevChildKey) {}
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {}
-        });
-
-        mDatabase.child(time).child("latitude").addChildEventListener(new ChildEventListener() {
-            @Override
-            public void onChildAdded(DataSnapshot dataSnapshot, String prevChildKey) {
-                //display the location
-                TextView latitudeTv = (TextView) findViewById(R.id.latitude_status);
-                Double latitudeDb = dataSnapshot.child("latitude").getValue(Double.class);
-                Double longitudeDb = dataSnapshot.child("latitude").getValue(Double.class);
-                latitudeTv.setText(latitudeDb + "");
-                //Load the current map image from Google map
-                String url = "https://maps.googleapis.com/maps/api/staticmap?center="
-                        + longitudeDb + "," + latitudeDb
-                        + "&zoom=20&size=400x250&key=" + getString(R.string.google_maps_key);  // key_api = google_maps_key
-                Picasso.with(SnapshotApiActivity.this).load(url).into((ImageView) findViewById(R.id.current_map));
-            }
-
-            @Override
-            public void onChildChanged(DataSnapshot dataSnapshot, String prevChildKey) {}
-
-            @Override
-            public void onChildRemoved(DataSnapshot dataSnapshot) {}
-
-            @Override
-            public void onChildMoved(DataSnapshot dataSnapshot, String prevChildKey) {}
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {}
-        });
-
-        mDatabase.child(time).child("time").addChildEventListener(new ChildEventListener() {
-            @Override
-            public void onChildAdded(DataSnapshot dataSnapshot, String prevChildKey) {
-                //display the time
-                TextView timeTv = (TextView) findViewById(R.id.probable_activity_time);
-                String timeDb = dataSnapshot.child("time").getValue().toString();
-                timeTv.setText("Time & Date: " + timeDb);
-            }
-
-            @Override
-            public void onChildChanged(DataSnapshot dataSnapshot, String prevChildKey) {}
-
-            @Override
-            public void onChildRemoved(DataSnapshot dataSnapshot) {}
-
-            @Override
-            public void onChildMoved(DataSnapshot dataSnapshot, String prevChildKey) {}
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {}
-        });
-
-        mDatabase.child(time).child("temperature").addChildEventListener(new ChildEventListener() {
-            @Override
-            public void onChildAdded(DataSnapshot dataSnapshot, String prevChildKey) {
-                //display the weather
-                TextView temperatureTv = (TextView) findViewById(R.id.temperature_status);
-                Double temperatureDb = dataSnapshot.child("temperature (°C)").getValue(Double.class);
-                Double humidityDb = dataSnapshot.child("humidity").getValue(Double.class);
-                temperatureTv.setText(temperatureDb + "");
-               // Log.i("aicii_temp", weatherDb);
-            }
-
-            @Override
-            public void onChildChanged(DataSnapshot dataSnapshot, String prevChildKey) {}
-
-            @Override
-            public void onChildRemoved(DataSnapshot dataSnapshot) {}
-
-            @Override
-            public void onChildMoved(DataSnapshot dataSnapshot, String prevChildKey) {}
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {}
-        });
-
-        mDatabase.child(time).child("humidity").addValueEventListener()
-        mDatabase.child(time).child("humidity").addChildEventListener(new ChildEventListener() {
-            @Override
-            public void onChildAdded(DataSnapshot dataSnapshot, String prevChildKey) {
-                //display the weather
-                TextView humidityTv = (TextView) findViewById(R.id.humidity_status);
-                Double humidityDb = dataSnapshot.child("humidity").getValue(Double.class);
-                humidityTv.setText("Humidity: "+ humidityDb);
-            }
-
-            @Override
-            public void onChildChanged(DataSnapshot dataSnapshot, String prevChildKey) {}
-
-            @Override
-            public void onChildRemoved(DataSnapshot dataSnapshot) {}
-
-            @Override
-            public void onChildMoved(DataSnapshot dataSnapshot, String prevChildKey) {}
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {}
-        });
-
-        mDatabase.child(time).child("headphone").orderByKey().addChildEventListener(new ChildEventListener() {
-            @Override
-            public void onChildAdded(DataSnapshot dataSnapshot, String prevChildKey) {
-                //display the status headphone
-                TextView headphoneStatusTv = (TextView)findViewById(R.id.headphone_status);
-                String headphoneStatusDb = dataSnapshot.child("headphone").getValue().toString();
-                headphoneStatusTv.setText(headphoneStatusDb);
-
-            }
-
-            @Override
-            public void onChildChanged(DataSnapshot dataSnapshot, String prevChildKey) {}
-
-            @Override
-            public void onChildRemoved(DataSnapshot dataSnapshot) {}
-
-            @Override
-            public void onChildMoved(DataSnapshot dataSnapshot, String prevChildKey) {}
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {}
-        });
-*/
-
 
             mDatabase.orderByKey().limitToLast(1).addChildEventListener(new ChildEventListener() {
                 @Override
@@ -378,15 +182,24 @@ public class SnapshotApiActivity extends AppCompatActivity {
                     Double temperatureDb = dataSnapshot.child("temperature (°C)").getValue(Double.class);
                     temperatureTv.setText("Temperature: " + temperatureDb);
 
-                    //display the time
+                    //display the time in seconds
                     TextView timeTv = (TextView) findViewById(R.id.probable_activity_time);
                     String timeDb = dataSnapshot.child("time").getValue().toString();
                     timeTv.setText("Time & Date: " + timeDb);
 
                     //display the status
                     TextView headphoneStatusTv = (TextView)findViewById(R.id.headphone_status);
-     //               String headphoneStatusDb = dataSnapshot.child("headphone").getValue().toString();
-       //             headphoneStatusTv.setText(headphoneStatusDb);
+                    String headphoneStatusDb = dataSnapshot.child("headphone").getValue().toString();
+                    headphoneStatusTv.setText(headphoneStatusDb);
+
+                    Calendar calendar = Calendar.getInstance();
+                    SimpleDateFormat format = new SimpleDateFormat("EEEE, dd-MM-yyyy 'at' hh:mm:ss a ");
+                    String currentTime = format.format(calendar.getTime());
+
+                    //display the current time
+                    TextView currentTimeTv = (TextView)findViewById(R.id.current_time);
+                    //String currentTimeDb = dataSnapshot.getValue().toString();
+                    currentTimeTv.setText(currentTime);
 
 
                     //Load the current map image from Google map
