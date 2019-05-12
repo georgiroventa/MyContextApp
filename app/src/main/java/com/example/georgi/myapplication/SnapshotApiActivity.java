@@ -15,6 +15,7 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.PersistableBundle;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
@@ -60,8 +61,11 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.squareup.picasso.Picasso;
 
+import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.text.SimpleDateFormat;
@@ -76,37 +80,33 @@ import androidx.work.WorkManager;
 
 public class SnapshotApiActivity extends AppCompatActivity {
 
-
-    private static final String TAG = "SnapshotActivity";
-
+    //tags
+    private String LOG_TAG = "Status directory";
     private Button b5;
     private TextView tl;
-
     private SensorManager sensorManager;
     private Sensor light;
 
-    private FirebaseAuth mAuth;
+    private FirebaseAuth mAuth = FirebaseAuth.getInstance();;
     private FirebaseDatabase database;
-    private DatabaseReference mDatabase;
-    FirebaseUser firebaseUser;
 
+    FirebaseUser firebaseUser;
     String time;
 
-    //text file
+    //data about user
     DateAboutContextUser dataUser;
-    public FileOutputStream fos;
-    private static final String FILE_NAME = "cevaa.txt";
+
+
+    SimpleDateFormat format_day = new SimpleDateFormat("EEEE");
+    String dayWeek = format_day.format(new Date());
+    private DatabaseReference mDatabase = FirebaseDatabase.getInstance().getReference().child("DateAboutContextUser").child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(dayWeek);
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_snapshot_api);
 
-        mAuth = FirebaseAuth.getInstance();
-        //firebaseUser = mAuth.getCurrentUser();
-        //get a database reference
-        //database = FirebaseDatabase.getInstance();
-        mDatabase = FirebaseDatabase.getInstance().getReference().child("DateAboutContextUser").child(FirebaseAuth.getInstance().getCurrentUser().getUid());
 
         //instantiate dataUser reference
         dataUser = new DateAboutContextUser();
@@ -131,36 +131,38 @@ public class SnapshotApiActivity extends AppCompatActivity {
                 }
             });
 
-            Snapshot sa = Snapshot.getInstance(getApplicationContext());
-            time = sa.callSnapShotGroupApis();
+            //Snapshot sa = Snapshot.getInstance(getApplicationContext());
+            //time = sa.callSnapShotGroupApis();
 
-            //save();
 
-            scheduleJob();
             //startService();
             displayData();
 
         }
     }
 
-
+/*
     @Override
     public void onStart() {
         super.onStart();
         // Check if user is signed in (non-null) and update UI accordingly.
         FirebaseUser currentUser = mAuth.getCurrentUser();
+        //displayData();
     }
-
+*/
 
     public void displayData(){
         Log.i("display: ", "sunt aici");
 
-            mDatabase.orderByKey().limitToLast(1).addChildEventListener(new ChildEventListener() {
+            mDatabase.limitToLast(1).addChildEventListener(new ChildEventListener() {
+
                 @Override
                 public void onChildAdded(DataSnapshot dataSnapshot, String prevChildKey) {
                     //set the activity name
+                    //prevChildKey = "oiii";
+                    //Log.i("PrevChild", prevChildKey);
                     TextView activityTv = (TextView) findViewById(R.id.probable_activity_name);
-                    String activityDb = dataSnapshot.child("activity").getValue().toString();
+                    String activityDb = dataSnapshot.child("activity").getValue(String.class);
                     dataUser.setActivityU(activityDb);
                     activityTv.setText(activityDb);
 
@@ -185,6 +187,7 @@ public class SnapshotApiActivity extends AppCompatActivity {
                     //display the time in seconds
                     TextView timeTv = (TextView) findViewById(R.id.probable_activity_time);
                     String timeDb = dataSnapshot.child("time").getValue().toString();
+                    Log.i("Time in seconds", timeDb);
                     timeTv.setText("Time & Date: " + timeDb);
 
                     //display the status
@@ -195,6 +198,7 @@ public class SnapshotApiActivity extends AppCompatActivity {
                     Calendar calendar = Calendar.getInstance();
                     SimpleDateFormat format = new SimpleDateFormat("EEEE, dd-MM-yyyy 'at' hh:mm:ss a ");
                     String currentTime = format.format(calendar.getTime());
+                    Log.i("Timpul curent", currentTime);
 
                     //display the current time
                     TextView currentTimeTv = (TextView)findViewById(R.id.current_time);
@@ -223,33 +227,14 @@ public class SnapshotApiActivity extends AppCompatActivity {
                 public void onCancelled(DatabaseError databaseError) {}
             });
 
+
+
+
+
+
     }
 
 
-
-
-
-
-
-    //jobScheduler
-    public void scheduleJob() {
-        ComponentName componentName = new ComponentName(this, ColectJobService.class);
-
-        JobInfo info = new JobInfo.Builder(123, componentName)
-                //.setRequiresCharging(true)
-               // .setExtras(bundle)
-                .setPersisted(true)
-                .setPeriodic(15 * 60 * 1000)
-                .build();
-
-        JobScheduler scheduler = (JobScheduler) getSystemService(JOB_SCHEDULER_SERVICE);
-        int resultCode = scheduler.schedule(info);
-        if (resultCode == JobScheduler.RESULT_SUCCESS) {
-            Log.d(TAG, "Job scheduled");
-        } else {
-            Log.d(TAG, "Job scheduling failed");
-        }
-    }
 
     public void startService() {
 
@@ -300,38 +285,3 @@ public class SnapshotApiActivity extends AppCompatActivity {
     }
 }
 
-
-
-//scriere in fisier
-/*
-try {
-                    fos = openFileOutput(FILE_NAME, MODE_APPEND);
-                    //  Log.i("headphone_context22222", dateAboutContextUser.getHeadphone());
-                    // fos.write(activityDb.getBytes());
-                    fos.write("\n".getBytes());
-                    fos.write(locationDb.getBytes());
-                    fos.write("\n".getBytes());
-                    fos.write(weatherDb.getBytes());
-                    fos.write("\n".getBytes());
-                    fos.write(headphoneStatusDb.getBytes());
-                    fos.write("\n".getBytes());
-                    // fos.write(timeDb.getBytes());
-                    fos.write("\n".getBytes());
-                    fos.close();
-                }  catch (IOException e) {
-                    e.printStackTrace();
-                }
-*/
-
- /*
-                try {
-                    fos = openFileOutput(FILE_NAME, MODE_PRIVATE);
-                    osw = new OutputStreamWriter(fos);
-                   // osw.append(activity).append(time).append(location).append(headphoneStatus).append(weather);
-                    osw.close();
-                    Log.i("Saved to ", getFilesDir() + "/" + FILE_NAME);
-
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-  */

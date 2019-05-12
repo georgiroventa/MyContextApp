@@ -1,6 +1,9 @@
 package com.example.georgi.myapplication;
 
 import android.app.Activity;
+import android.app.job.JobInfo;
+import android.app.job.JobScheduler;
+import android.content.ComponentName;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -89,53 +92,6 @@ public class MainActivity extends Activity implements OnClickListener {
             return;
         }
 
-        /*if (mRef != null)
-            try {
-                mRef.addListenerForSingleValueEvent(new ValueEventListener() {
-
-                    @Override
-                    public void onDataChange(DataSnapshot dataSnapshot) {
-                        Parent parent = null;
-                        if (dataSnapshot.exists()) {
-                            for (DataSnapshot result : dataSnapshot.getChildren()) {
-                                parent = result.getValue(Parent.class);
-                                userEmail = parent.getEmail();
-                                if ((parent != null) && (parent.getEmail().equals(email))) {
-                                    userEmail = parent.getEmail();
-                                   String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
-                                    String aux = parent.getType();
-                                     if (aux.equals("user") && (password.equals(parent.password))) {
-                                            userEmail = parent.getEmail();
-                                            Toast.makeText(MainActivity.this, "Login successful", Toast.LENGTH_LONG).show();
-                                            Intent start = new Intent(MainActivity.this, ParentActivity.class);
-                                            start.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                                            start.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                                            startActivity(start);
-                                            return;
-
-                                     } else {
-                                            Toast.makeText(MainActivity.this, "The password is incorrect", Toast.LENGTH_LONG).show();
-                                            return;
-                                        }
-
-                                }
-
-
-                            }
-
-                            Toast.makeText(MainActivity.this, "The user is not registered", Toast.LENGTH_LONG).show();
-                        }
-                    }
-
-                    @Override
-                    public void onCancelled(DatabaseError databaseError) {
-
-                    }
-
-                });
-            } catch (Exception e) {
-                Toast.makeText(MainActivity.this, "User don t exit!", Toast.LENGTH_LONG).show();
-            }*/
         mAuth.signInWithEmailAndPassword(email, password)
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                     @Override
@@ -163,6 +119,7 @@ public class MainActivity extends Activity implements OnClickListener {
                 });
 
     }
+
 
 
     @Override

@@ -31,10 +31,12 @@ import androidx.work.WorkManager;
 
 public class ParentActivity extends AppCompatActivity
 {
+    private static final String TAG = "ParentActivity";
     FirebaseAuth mAuth;
     private FirebaseDatabase database;
     private DatabaseReference mDatabase;
     private static final int GET_PERMISSION_REQUEST_CODE = 1;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,6 +62,15 @@ public class ParentActivity extends AppCompatActivity
                 }
             });
             final Button buttonU2 = (Button) findViewById(R.id.button_children);
+            buttonU2.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent intent = new Intent(ParentActivity.this, ContextDataActivity.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                    startActivity(intent);
+                }
+            });
             final Button buttonU3 = (Button) findViewById(R.id.button_notifications);
             final Button buttonU5 = (Button) findViewById(R.id.button_request);
             buttonU5.setOnClickListener(new View.OnClickListener() {
@@ -92,6 +103,16 @@ public class ParentActivity extends AppCompatActivity
                     startActivity(intent);
                 }
             });
+            final Button buttonU8 = (Button) findViewById(R.id.button_settings);
+            buttonU8.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent intent = new Intent(ParentActivity.this, SettingsActivity.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                    startActivity(intent);
+                }
+            });
 
 
             final Button buttonU4 = (Button) findViewById(R.id.logoutButton);
@@ -107,6 +128,8 @@ public class ParentActivity extends AppCompatActivity
             });
 
         }
+        //call jobService
+        scheduleJob();
 
     }
     @Override
@@ -115,6 +138,28 @@ public class ParentActivity extends AppCompatActivity
         // Check if user is signed in (non-null) and update UI accordingly.
         FirebaseUser currentUser = mAuth.getCurrentUser();
     }
+
+    //jobScheduler
+    public void scheduleJob() {
+        ComponentName componentName = new ComponentName(this, ColectJobService.class);
+
+        JobInfo info = new JobInfo.Builder(123, componentName)
+                //.setRequiresCharging(true)
+                // .setExtras(bundle)
+                .setPersisted(true)
+                .setPeriodic(15 * 60 * 1000)
+                .build();
+
+        JobScheduler scheduler = (JobScheduler) getSystemService(JOB_SCHEDULER_SERVICE);
+        int resultCode = scheduler.schedule(info);
+        if (resultCode == JobScheduler.RESULT_SUCCESS) {
+            Log.d(TAG, "Job scheduled");
+        } else {
+            Log.d(TAG, "Job scheduling failed");
+        }
+    }
+
+
 
 
 

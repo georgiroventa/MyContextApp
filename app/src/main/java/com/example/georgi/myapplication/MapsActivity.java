@@ -56,7 +56,7 @@ import com.example.georgi.myapplication.Modules.Route;
 
 public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback, DirectionFinderListener, GoogleApiClient.ConnectionCallbacks {
 
-    private GoogleMap mMap;
+    private GoogleMap mMap, mMap1;
     private Button btnFindPath;
     private EditText etOrigin;
     private EditText etDestination;
@@ -110,7 +110,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                         startActivity(intent0);
                         break;
                     case R.id.nav_map:
-
+                        Intent intent1 = new Intent(MapsActivity.this, MapsActivity.class);
+                        startActivity(intent1);
                         break;
                     case R.id.nav_noise:
                         Intent intent2 = new Intent(MapsActivity.this, NoiseLevelActivity.class);
@@ -214,10 +215,16 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
+        mMap1 = googleMap;
         LatLng hcmus = new LatLng(/*45.7497836*/ latitude, /*21.2428627 */ longitude);
+        LatLng hcmus1 = new LatLng(45.752330780,21.2235641479);
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(hcmus, 18));
+        mMap1.moveCamera(CameraUpdateFactory.newLatLngZoom(hcmus1, 18));
         originMarkers.add(mMap.addMarker(new MarkerOptions()
                 .position(hcmus)));
+        originMarkers.add(mMap1.addMarker(new MarkerOptions()
+                .position(hcmus1)));
+
 
         if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             // TODO: Consider calling
@@ -230,6 +237,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             return;
         }
         mMap.setMyLocationEnabled(true);
+        mMap1.setMyLocationEnabled(true);
     }
 
     @Override

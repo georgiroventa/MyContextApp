@@ -65,7 +65,11 @@
             android:permission="android.permission.BIND_JOB_SERVICE" />
 
         <activity android:name=".NoiseLevelActivity" />
-        <activity android:name=".NotificationsActivity"></activity>
+        <activity android:name=".NotificationsActivity" />
+        <activity
+            android:name=".SettingsActivity"
+            android:label="@string/title_activity_settings" />
+        <activity android:name=".ContextDataActivity"></activity>
     </application>
 
 </manifest>

@@ -1,6 +1,7 @@
 package com.example.georgi.myapplication;
 
 import android.location.Location;
+import android.os.Environment;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
@@ -17,6 +18,7 @@ import com.google.android.gms.location.ActivityRecognitionResult;
 import com.google.android.gms.location.DetectedActivity;
 
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
@@ -78,8 +80,26 @@ public class Snapshot extends AppCompatDialog implements GoogleApiClient.Connect
     FirebaseUser firebaseUser = mAuth.getCurrentUser();;
     private static Context context;
 
+    //create csv in external storage
+    public  File FILE_NAME = getPublicAlbumStorageDir("TestFile");
     public FileOutputStream fos;
-    private static final String FILE_NAME = "test.csv";
+
+    {
+        try {
+            File f = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/MyApplication/" + "/TestFile/" + "DataContextClient.csv");
+            if (!f.exists()) {
+                f.createNewFile();
+                Log.i("FileCreated", "file is created");
+            }
+
+            fos = new FileOutputStream(f, true);
+            fos.write("activity, time, headphoneStatus, latitude, longitude, humidity, temperature\n".getBytes());
+            fos.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
 
     int flag = 0x00;
     final int bit1 = 0x01;
@@ -89,12 +109,12 @@ public class Snapshot extends AppCompatDialog implements GoogleApiClient.Connect
     final int bit5 = 0x10;
 
     DateAboutContextUser dateAboutContextUser = new DateAboutContextUser();
-
     String timee;
+    String dayWeek;
 
 
     private static Snapshot ourInstance = null;
-
+    private String LOG_TAG = "Status directory";
 
     public static Snapshot getInstance(Context context1) {
         context = context1;
@@ -125,10 +145,14 @@ public class Snapshot extends AppCompatDialog implements GoogleApiClient.Connect
         //Google API client connected. Ready to use awareness api
     }
 
+
     public String callSnapShotGroupApis() {
         Calendar calendar = Calendar.getInstance();
-        SimpleDateFormat format = new SimpleDateFormat("EEEE, dd-MM-yyyy 'at' hh:mm:ss a ");
-        timee = format.format(calendar.getTime());
+        SimpleDateFormat format_time = new SimpleDateFormat("dd-MM-yyyy 'at' kk:mm:ss  ");
+        timee = format_time.format(calendar.getTime());
+        SimpleDateFormat format_day = new SimpleDateFormat("EEEE");
+        dayWeek = format_day.format(new Date());
+        Log.i("Zi din saptamana", dayWeek);
         buildApiClient();
 
         //get info about user's current activity
@@ -318,23 +342,67 @@ public class Snapshot extends AppCompatDialog implements GoogleApiClient.Connect
                 });
     }
 
-    public void save () {
-        Log.i("Flag", String.valueOf(flag));
-        if( flag == 31 ){
-            mDatabase.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(timee).child("temperature (°C)").setValue(dateAboutContextUser.getTemperature());
-            mDatabase.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(timee).child("humidity").setValue(dateAboutContextUser.getHumidity());
-            mDatabase.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(timee).child("latitude").setValue(dateAboutContextUser.getLatitude());
-            mDatabase.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(timee).child("longitude").setValue(dateAboutContextUser.getLongitude());
-            mDatabase.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(timee).child("headphone").setValue(dateAboutContextUser.getHeadphone());
-            mDatabase.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(timee).child("activity").setValue(dateAboutContextUser.getActivityU());
-            mDatabase.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(timee).child("time").setValue(dateAboutContextUser.getTime());
-            flag = 0x00;
-        }
-        else
-        {
 
+    /* Checks if external storage is available for read and write */
+    public boolean isExternalStorageWritable() {
+        String state = Environment.getExternalStorageState();
+        if (Environment.MEDIA_MOUNTED.equals(state)) {
+            Log.i("State", "Yes, it is writable!");
+            return true;
         }
+        return false;
     }
+
+
+    public File getPublicAlbumStorageDir(String albumName) {
+        // Get the directory for the user's public pictures directory.
+        File file = new File(Environment.getExternalStoragePublicDirectory(
+                "MyApplication"), albumName);
+        Log.i("directory", "directory is created");
+        if (!file.mkdirs()) {
+            Log.e(LOG_TAG, "Directory not created");
+        }
+        return  file;
+    }
+
+
+
+        public void save () {
+            Log.i("Flag", String.valueOf(flag));
+            if( flag == 31 ){
+                mDatabase.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(dayWeek).child(timee).child("temperature (°C)").setValue(dateAboutContextUser.getTemperature());
+                mDatabase.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(dayWeek).child(timee).child("humidity").setValue(dateAboutContextUser.getHumidity());
+                mDatabase.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(dayWeek).child(timee).child("latitude").setValue(dateAboutContextUser.getLatitude());
+                Log.i("Longgg", String.valueOf(dateAboutContextUser.getLongitude()));
+                mDatabase.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(dayWeek).child(timee).child("longitude").setValue(dateAboutContextUser.getLongitude());
+                mDatabase.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(dayWeek).child(timee).child("headphone").setValue(dateAboutContextUser.getHeadphone());
+                mDatabase.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(dayWeek).child(timee).child("activity").setValue(dateAboutContextUser.getActivityU());
+                mDatabase.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(dayWeek).child(timee).child("time").setValue(dateAboutContextUser.getTime());
+                flag = 0x00;
+                String contextData = dateAboutContextUser.getActivityU() + "," + dateAboutContextUser.getTime() + "," +
+                                    dateAboutContextUser.getHeadphone() + "," + dateAboutContextUser.getLatitude() + "," +
+                                    dateAboutContextUser.getLongitude() + "," + dateAboutContextUser.getHumidity() + "," +
+                                    dateAboutContextUser.getTemperature() + "\n";
+
+                try {
+                    File f = new File(Environment.getExternalStorageDirectory().getAbsolutePath()+"/MyApplication/" + "/TestFile/" + "DataContextClient.csv" );
+                    if (!f.exists()) {
+                        f.createNewFile();
+                        Log.i("FileCreatedInDisplay", "file is created");
+                    }
+                    Log.i("fisier_", "intra aici");
+                    fos = new FileOutputStream(f, true);
+                    fos.write(contextData.getBytes());
+                    fos.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            else
+            {
+
+            }
+        }
 
 
         @Override
@@ -351,16 +419,4 @@ public class Snapshot extends AppCompatDialog implements GoogleApiClient.Connect
 
 }
 
-//scrie in csv
-
-                        /*try {
-                            fos = getContext().openFileOutput(FILE_NAME, getContext().MODE_APPEND);
-                            fos.write(String.valueOf(humidity).getBytes());
-                            fos.write(",".getBytes());
-                            fos.write(String.valueOf(temperature).getBytes());
-                            fos.write("\n".getBytes());
-                            fos.close();
-                        }  catch (IOException e) {
-                            e.printStackTrace();
-                        }*/
 
