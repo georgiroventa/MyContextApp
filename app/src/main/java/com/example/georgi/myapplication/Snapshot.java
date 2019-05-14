@@ -86,7 +86,7 @@ public class Snapshot extends AppCompatDialog implements GoogleApiClient.Connect
 
     {
         try {
-            File f = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/MyApplication/" + "/TestFile/" + "DataContextClient.csv");
+            File f = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/ContextApp/" + "/TestFile/" + "DataContextClient.csv");
             if (!f.exists()) {
                 f.createNewFile();
                 Log.i("FileCreated", "file is created");
@@ -148,7 +148,7 @@ public class Snapshot extends AppCompatDialog implements GoogleApiClient.Connect
 
     public String callSnapShotGroupApis() {
         Calendar calendar = Calendar.getInstance();
-        SimpleDateFormat format_time = new SimpleDateFormat("dd-MM-yyyy 'at' kk:mm:ss  ");
+        SimpleDateFormat format_time = new SimpleDateFormat("dd-MM-yyyy 'at' HH:mm:ss  ");
         timee = format_time.format(calendar.getTime());
         SimpleDateFormat format_day = new SimpleDateFormat("EEEE");
         dayWeek = format_day.format(new Date());
@@ -260,7 +260,6 @@ public class Snapshot extends AppCompatDialog implements GoogleApiClient.Connect
                         dateAboutContextUser.setHeadphone(headphoneStatus);
                         flag = flag | bit3;
                         save();
-                       // Log.i("georgiiii", dateAboutContextUser.getHeadphone());
                        // mDatabase.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(timee).child("headphone").setValue(headphoneStatus);
 
 
@@ -357,7 +356,7 @@ public class Snapshot extends AppCompatDialog implements GoogleApiClient.Connect
     public File getPublicAlbumStorageDir(String albumName) {
         // Get the directory for the user's public pictures directory.
         File file = new File(Environment.getExternalStoragePublicDirectory(
-                "MyApplication"), albumName);
+                "ContextApp"), albumName);
         Log.i("directory", "directory is created");
         if (!file.mkdirs()) {
             Log.e(LOG_TAG, "Directory not created");
@@ -373,7 +372,6 @@ public class Snapshot extends AppCompatDialog implements GoogleApiClient.Connect
                 mDatabase.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(dayWeek).child(timee).child("temperature (°C)").setValue(dateAboutContextUser.getTemperature());
                 mDatabase.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(dayWeek).child(timee).child("humidity").setValue(dateAboutContextUser.getHumidity());
                 mDatabase.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(dayWeek).child(timee).child("latitude").setValue(dateAboutContextUser.getLatitude());
-                Log.i("Longgg", String.valueOf(dateAboutContextUser.getLongitude()));
                 mDatabase.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(dayWeek).child(timee).child("longitude").setValue(dateAboutContextUser.getLongitude());
                 mDatabase.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(dayWeek).child(timee).child("headphone").setValue(dateAboutContextUser.getHeadphone());
                 mDatabase.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(dayWeek).child(timee).child("activity").setValue(dateAboutContextUser.getActivityU());
@@ -385,10 +383,10 @@ public class Snapshot extends AppCompatDialog implements GoogleApiClient.Connect
                                     dateAboutContextUser.getTemperature() + "\n";
 
                 try {
-                    File f = new File(Environment.getExternalStorageDirectory().getAbsolutePath()+"/MyApplication/" + "/TestFile/" + "DataContextClient.csv" );
+                    File f = new File(Environment.getExternalStorageDirectory().getAbsolutePath()+"/ContextApp/" + "/TestFile/" + "DataContextClient.csv" );
                     if (!f.exists()) {
                         f.createNewFile();
-                        Log.i("FileCreatedInDisplay", "file is created");
+                        Log.i("FileCreated", "file is created");
                     }
                     Log.i("fisier_", "intra aici");
                     fos = new FileOutputStream(f, true);

@@ -196,7 +196,7 @@ public class SnapshotApiActivity extends AppCompatActivity {
                     headphoneStatusTv.setText(headphoneStatusDb);
 
                     Calendar calendar = Calendar.getInstance();
-                    SimpleDateFormat format = new SimpleDateFormat("EEEE, dd-MM-yyyy 'at' hh:mm:ss a ");
+                    SimpleDateFormat format = new SimpleDateFormat("EEEE, dd-MM-yyyy 'at' HH:mm:ss a ");
                     String currentTime = format.format(calendar.getTime());
                     Log.i("Timpul curent", currentTime);
 

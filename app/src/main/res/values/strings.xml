@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">My Context App</string>
+    <string name="app_name">Context App</string>
     <string name="full_name">Your name</string>
     <string name="email"> Your email</string>
     <string name="password">Your password</string>

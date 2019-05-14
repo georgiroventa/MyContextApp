@@ -55,51 +55,56 @@ public class ContextDataActivity extends AppCompatActivity {
     }
 
     public void displayDataContext(){
-        Query query  = mDatabase.limitToLast(1);
 
-        query.addValueEventListener(new ValueEventListener() {
+        mDatabase.limitToLast(1).addChildEventListener(new ChildEventListener() {
             @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                for(DataSnapshot child: dataSnapshot.getChildren()){
-                    Log.i("User key", child.getKey());
+            public void onChildAdded(DataSnapshot dataSnapshot, String prevChildKey) {
+                    Log.i("User key", dataSnapshot.getKey());
                     //display current time
-                    String time_dateDb = child.getKey();
+                    String time_dateDb = dataSnapshot.getKey();
                     date_time_tv.setText("Date and current time: " + time_dateDb);
 
                     //display user's activity
-                    String activityDb = child.child("activity").getValue(String.class);
+                    String activityDb = dataSnapshot.child("activity").getValue(String.class);
                     activity_tv.setText("User's activity: " + activityDb);
 
                     //display time in seconds
-                    Long time_secDb = child.child("time").getValue(Long.class);
+                    Long time_secDb = dataSnapshot.child("time").getValue(Long.class);
                     time_sec_tv.setText("Time in seconds: " + time_secDb);
 
                     //display status phone
-                    String headphoneDb = child.child("headphone").getValue(String.class);
+                    String headphoneDb = dataSnapshot.child("headphone").getValue(String.class);
                     headphone_tv.setText("Headphone status: " + headphoneDb);
 
                     //dispaly location in latitude and longitude
-                    Double latitudeDb = child.child("latitude").getValue(Double.class);
-                    Double longitudeDb = child.child("longitude").getValue(Double.class);
+                    Double latitudeDb = dataSnapshot.child("latitude").getValue(Double.class);
+                    Double longitudeDb = dataSnapshot.child("longitude").getValue(Double.class);
                     String locationDb = "Latitude: " + latitudeDb + "\nLongitude: " + longitudeDb;
                     location_tv.setText("Current location\n" + locationDb);
 
                     //display weather
-                    Double temperatureDb = child.child("temperature (°C)").getValue(Double.class);
-                    Double humdityDb = child.child("humidity").getValue(Double.class);
+                    Double temperatureDb = dataSnapshot.child("temperature (°C)").getValue(Double.class);
+                    Double humdityDb = dataSnapshot.child("humidity").getValue(Double.class);
                     String weatherDb = "Temperature: " + temperatureDb + " °C \nHumidity: " + humdityDb + " %";
                     weather_tv.setText("Current weather\n" + weatherDb);
 
 
-                    Log.i("User activity", child.child("activity").getValue().toString());
-                    Log.i("Time in seconds", child.child("time").getValue().toString());
-                }
+                    Log.i("User activity", dataSnapshot.child("activity").getValue().toString());
+                    Log.i("Time in seconds", dataSnapshot.child("time").getValue().toString());
+
             }
 
             @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
+            public void onChildChanged(DataSnapshot dataSnapshot, String prevChildKey) {}
 
-            }
+            @Override
+            public void onChildRemoved(DataSnapshot dataSnapshot) {}
+
+            @Override
+            public void onChildMoved(DataSnapshot dataSnapshot, String prevChildKey) {}
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {}
         });
     }
 

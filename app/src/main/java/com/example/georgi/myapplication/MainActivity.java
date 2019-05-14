@@ -5,9 +5,13 @@ import android.app.job.JobInfo;
 import android.app.job.JobScheduler;
 import android.content.ComponentName;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
+import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.util.Patterns;
 import android.view.View;
@@ -44,6 +48,7 @@ public class MainActivity extends Activity implements OnClickListener {
     EditText editTextEmail, editTextPassword;
     DatabaseReference mRef;
     private String TAG = "MainActivity";
+    private static final int GET_PERMISSION_REQUEST_CODE = 1;
 
 
     @Override
@@ -57,6 +62,9 @@ public class MainActivity extends Activity implements OnClickListener {
 
         findViewById(R.id.button_register).setOnClickListener(this);
         findViewById(R.id.button_login).setOnClickListener(this);
+
+        //obtain permissions
+        getPermission();
 
         mRef = FirebaseDatabase.getInstance().getReference().child("Users");
 
@@ -119,6 +127,32 @@ public class MainActivity extends Activity implements OnClickListener {
                 });
 
     }
+
+    public void getPermission(){
+        if (ContextCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                requestPermissions(new String[]{android.Manifest.permission.ACCESS_COARSE_LOCATION, android.Manifest.permission.ACCESS_FINE_LOCATION, android.Manifest.permission.INTERNET}
+                        , GET_PERMISSION_REQUEST_CODE);
+            }
+            return;
+        }
+    }
+    @Override
+    public void onRequestPermissionsResult(final int requestCode, @NonNull final String[] permissions, @NonNull final int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        //if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+        switch (requestCode) {
+            case GET_PERMISSION_REQUEST_CODE://location permission granted
+                //callWorker();
+                break;
+        }
+        // }
+        // else {
+        // Toast.makeText(SnapshotApiActivity.this, "Permission was not granted.", Toast.LENGTH_LONG).show();
+        //}
+
+    }
+
 
 
 
