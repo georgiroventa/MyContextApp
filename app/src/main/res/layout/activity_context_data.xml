@@ -62,13 +62,33 @@
         android:layout_marginTop="20dp"/>
 
     <TextView
+        android:id="@+id/date_format_tv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="39dp"
+        android:text="Date(dayOfWeek_dayOfMonth_month): "
+        android:textStyle="italic"
+        android:layout_below="@id/time_sec_tv"
+        android:layout_marginTop="20dp"/>
+
+    <TextView
+        android:id="@+id/time_slot_tv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="39dp"
+        android:text="Time slot: "
+        android:textStyle="italic"
+        android:layout_below="@id/date_format_tv"
+        android:layout_marginTop="20dp"/>
+
+    <TextView
     android:id="@+id/headphone_tv"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_marginStart="39dp"
     android:text="Headphone status: "
     android:textStyle="italic"
-    android:layout_below="@id/time_sec_tv"
+    android:layout_below="@id/time_slot_tv"
     android:layout_marginTop="20dp"/>
 
     <TextView

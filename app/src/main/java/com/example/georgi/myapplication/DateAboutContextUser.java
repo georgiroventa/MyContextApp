@@ -4,9 +4,10 @@ import java.text.SimpleDateFormat;
 
 public class DateAboutContextUser {
     private String activityU, headphone;
-    private long time;
+    private long timestamp, time;
     private int humidity, temperature;
     private float longitude, latitude;
+    private double timeSlot;
 
     public DateAboutContextUser(){
 
@@ -26,8 +27,16 @@ public class DateAboutContextUser {
         return activityU;
     }
 
+    public double getTimeSlot() {
+        return timeSlot;
+    }
+
     public String getHeadphone() {
         return headphone;
+    }
+
+    public long getTimestamp() {
+        return timestamp;
     }
 
     public long getTime() {
@@ -58,7 +67,11 @@ public class DateAboutContextUser {
         this.headphone = headphone;
     }
 
-    public void setTimeSeconds(long time) {
+    public void setTimestamp(long timestamp) {
+        this.timestamp = timestamp;
+    }
+
+    public void setTimeFormat(long time) {
         this.time = time;
     }
 
@@ -76,5 +89,9 @@ public class DateAboutContextUser {
 
     public void setLatitude(float latitude) {
         this.latitude = latitude;
+    }
+
+    public void setTimeSlot(double timeSlot) {
+        this.timeSlot = timeSlot;
     }
 }

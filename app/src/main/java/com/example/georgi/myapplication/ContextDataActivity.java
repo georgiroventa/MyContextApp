@@ -24,8 +24,8 @@ import java.util.Date;
 
 public class ContextDataActivity extends AppCompatActivity {
 
-    private TextView date_time_tv, activity_tv, time_sec_tv, headphone_tv;
-    private TextView weather_tv, location_tv;
+    private TextView date_time_tv, activity_tv, time_sec_tv, date_format_tv;
+    private TextView weather_tv, location_tv, headphone_tv, time_slot_tv;
     private Button button;
 
     SimpleDateFormat format_day = new SimpleDateFormat("EEEE");
@@ -41,6 +41,8 @@ public class ContextDataActivity extends AppCompatActivity {
         date_time_tv = (TextView)findViewById(R.id.date_time_tv);
         activity_tv = (TextView)findViewById(R.id.activity_tv);
         time_sec_tv = (TextView)findViewById(R.id.time_sec_tv);
+        time_slot_tv = (TextView)findViewById(R.id.time_slot_tv);
+        date_format_tv = (TextView)findViewById(R.id.date_format_tv);
         headphone_tv = (TextView)findViewById(R.id.headphone_tv);
         weather_tv = (TextView)findViewById(R.id.weather_tv);
         location_tv = (TextView)findViewById(R.id.location_tv);
@@ -69,8 +71,16 @@ public class ContextDataActivity extends AppCompatActivity {
                     activity_tv.setText("User's activity: " + activityDb);
 
                     //display time in seconds
-                    Long time_secDb = dataSnapshot.child("time").getValue(Long.class);
+                    Long time_secDb = dataSnapshot.child("timestamp").getValue(Long.class);
                     time_sec_tv.setText("Time in seconds: " + time_secDb);
+
+                    //display date format
+                    Long timeFormatDb = dataSnapshot.child("time").getValue(Long.class);
+                    date_format_tv.setText("Date(dayOfWeek_dayOfMonth_month): " + timeFormatDb);
+
+                    //display time slot
+                    Double timeSlotDb = dataSnapshot.child("timeslot").getValue(Double.class);
+                    time_slot_tv.setText("Time slot: " + timeSlotDb);
 
                     //display status phone
                     String headphoneDb = dataSnapshot.child("headphone").getValue(String.class);

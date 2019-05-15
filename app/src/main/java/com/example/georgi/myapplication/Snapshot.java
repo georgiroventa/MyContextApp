@@ -332,8 +332,30 @@ public class Snapshot extends AppCompatDialog implements GoogleApiClient.Connect
                         //get the time
                         SimpleDateFormat sdf = new SimpleDateFormat(" hh:mm:ss a ", Locale.getDefault());
                         Calendar calendar = Calendar.getInstance();
-                        long data = calendar.getTimeInMillis() / 1000;
-                        dateAboutContextUser.setTimeSeconds(data);
+                        long timestamp = calendar.getTimeInMillis();
+                        long data = calendar.getTimeInMillis() / 1000; //time in seconds
+                        //convert timestamp in format like DAY_OF_WEEK DAY_OF_MONTH MONTH MONTH_OF_YEAR
+
+                        int day_week = calendar.get(Calendar.DAY_OF_WEEK);  //sunday = 1
+                        int day_month = calendar.get(Calendar.DAY_OF_MONTH);
+                        int hour = calendar.get(Calendar.HOUR_OF_DAY);
+                        int month = calendar.get(Calendar.MONTH) + 1; // months start from 0 to 11
+                        long timeFormat = (day_week*100 + day_month)*100 + month;
+                        Log.i("ora", String.valueOf(hour));
+                        double timeSlot;
+                        int minutes = calendar.get(Calendar.MINUTE);
+                        if(minutes >= 0 && minutes <= 30){
+                            timeSlot = hour;
+                        }
+                        else
+                        {
+                            timeSlot = hour + 0.5;
+                        }
+                        Log.i("minute", String.valueOf(minutes));
+                        Log.i("TimeSlot", String.valueOf(timeSlot));
+                        dateAboutContextUser.setTimeFormat(timeFormat);
+                        dateAboutContextUser.setTimestamp(data);
+                        dateAboutContextUser.setTimeSlot(timeSlot);
                         flag = flag | bit5;
                         save();
                         //mDatabase.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(timee).child("time").setValue(sdf);
@@ -375,9 +397,12 @@ public class Snapshot extends AppCompatDialog implements GoogleApiClient.Connect
                 mDatabase.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(dayWeek).child(timee).child("longitude").setValue(dateAboutContextUser.getLongitude());
                 mDatabase.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(dayWeek).child(timee).child("headphone").setValue(dateAboutContextUser.getHeadphone());
                 mDatabase.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(dayWeek).child(timee).child("activity").setValue(dateAboutContextUser.getActivityU());
+                mDatabase.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(dayWeek).child(timee).child("timestamp").setValue(dateAboutContextUser.getTimestamp());
                 mDatabase.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(dayWeek).child(timee).child("time").setValue(dateAboutContextUser.getTime());
+                mDatabase.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(dayWeek).child(timee).child("timeslot").setValue(dateAboutContextUser.getTimeSlot());
                 flag = 0x00;
                 String contextData = dateAboutContextUser.getActivityU() + "," + dateAboutContextUser.getTime() + "," +
+                                    dateAboutContextUser.getTimestamp() + "," + dateAboutContextUser.getTimeSlot() + "," +
                                     dateAboutContextUser.getHeadphone() + "," + dateAboutContextUser.getLatitude() + "," +
                                     dateAboutContextUser.getLongitude() + "," + dateAboutContextUser.getHumidity() + "," +
                                     dateAboutContextUser.getTemperature() + "\n";
