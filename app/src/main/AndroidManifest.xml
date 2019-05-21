@@ -69,7 +69,8 @@
         <activity
             android:name=".SettingsActivity"
             android:label="@string/title_activity_settings" />
-        <activity android:name=".ContextDataActivity"></activity>
+        <activity android:name=".ContextDataActivity" />
+        <activity android:name=".KmeansActivity"></activity>
     </application>
 
 </manifest>

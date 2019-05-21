@@ -69,6 +69,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -96,6 +97,7 @@ public class SnapshotApiActivity extends AppCompatActivity {
     //data about user
     DateAboutContextUser dataUser;
 
+    private Kmeans kmeans;
 
     SimpleDateFormat format_day = new SimpleDateFormat("EEEE");
     String dayWeek = format_day.format(new Date());
@@ -139,6 +141,22 @@ public class SnapshotApiActivity extends AppCompatActivity {
             displayData();
 
         }
+
+        //call Kmeans algo
+        float matrix[][] = {{45.76498f, 21.22454f}, {45.76516f, 21.22461f}, {45.76504f, 21.22455f}, {45.74980f, 21.24286f}, {45.74980f, 21.24286f}, {45.74981f, 21.24282f}, {45.74978f, 21.24287f}};
+        final ArrayList<Kmeans.Mean> means;
+        kmeans = new Kmeans();
+        means = (ArrayList<Kmeans.Mean>) kmeans.predict(3,matrix);
+
+        for ( int a  = 0; a < means.size(); a++){
+            Kmeans.Mean mean = means.get(a);
+            float[] c = mean.getCentroid();
+            for(int b = 0; b < c.length; b++) {
+                float x = mean.mCentroid[b];
+                float ab = x;
+            }
+
+        }
     }
 
 /*
@@ -162,9 +180,37 @@ public class SnapshotApiActivity extends AppCompatActivity {
                     //prevChildKey = "oiii";
                     //Log.i("PrevChild", prevChildKey);
                     TextView activityTv = (TextView) findViewById(R.id.probable_activity_name);
-                    String activityDb = dataSnapshot.child("activity").getValue(String.class);
+                    Integer activityDb = dataSnapshot.child("activity").getValue(Integer.class).intValue();
+                    String activityDb_type = "";
+                    if(activityDb == 1){
+                        activityDb_type = "Still";
+                    }
+                    else
+                    if(activityDb == 2){
+                        activityDb_type = "Unknown";
+                    }
+                    else
+                    if(activityDb == 3){
+                        activityDb_type = "In vehicle";
+                    }
+                    else
+                    if(activityDb == 4){
+                        activityDb_type = "On bicycle";
+                    }
+                    else
+                    if(activityDb == 5){
+                        activityDb_type = "On foot";
+                    }
+                    else
+                    if(activityDb == 6){
+                        activityDb_type = "Running";
+                    }
+                    else
+                    if(activityDb == 7){
+                        activityDb_type = "Walking";
+                    }
                     dataUser.setActivityU(activityDb);
-                    activityTv.setText(activityDb);
+                    activityTv.setText(activityDb_type);
 
                     //display the location
                     TextView longitudeTv = (TextView) findViewById(R.id.longitude_status);
@@ -192,8 +238,14 @@ public class SnapshotApiActivity extends AppCompatActivity {
 
                     //display the status
                     TextView headphoneStatusTv = (TextView)findViewById(R.id.headphone_status);
-                    String headphoneStatusDb = dataSnapshot.child("headphone").getValue().toString();
-                    headphoneStatusTv.setText(headphoneStatusDb);
+                    Integer headphoneStatusDb = dataSnapshot.child("headphone").getValue(Integer.class).intValue();
+                    if(headphoneStatusDb == 1){
+                        headphoneStatusTv.setText("Plugged in");
+                    }
+                    else
+                    {
+                        headphoneStatusTv.setText("Unplugged");
+                    }
 
                     Calendar calendar = Calendar.getInstance();
                     SimpleDateFormat format = new SimpleDateFormat("EEEE, dd-MM-yyyy 'at' HH:mm:ss a ");
@@ -226,9 +278,6 @@ public class SnapshotApiActivity extends AppCompatActivity {
                 @Override
                 public void onCancelled(DatabaseError databaseError) {}
             });
-
-
-
 
 
 

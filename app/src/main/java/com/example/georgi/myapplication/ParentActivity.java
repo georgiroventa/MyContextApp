@@ -73,6 +73,15 @@ public class ParentActivity extends AppCompatActivity
                 }
             });
             final Button buttonU3 = (Button) findViewById(R.id.button_notifications);
+            buttonU3.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent intent = new Intent(ParentActivity.this, KmeansActivity.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                    startActivity(intent);
+                }
+            });
             final Button buttonU5 = (Button) findViewById(R.id.button_request);
             buttonU5.setOnClickListener(new View.OnClickListener() {
                 @Override

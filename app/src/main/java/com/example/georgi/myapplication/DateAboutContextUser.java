@@ -3,7 +3,7 @@ package com.example.georgi.myapplication;
 import java.text.SimpleDateFormat;
 
 public class DateAboutContextUser {
-    private String activityU, headphone;
+    private int activityU, headphone;
     private long timestamp, time;
     private int humidity, temperature;
     private float longitude, latitude;
@@ -23,7 +23,7 @@ public class DateAboutContextUser {
         this.time = time;
     }*/
 
-    public String getActivityU() {
+    public int getActivityU() {
         return activityU;
     }
 
@@ -31,7 +31,7 @@ public class DateAboutContextUser {
         return timeSlot;
     }
 
-    public String getHeadphone() {
+    public int getHeadphone() {
         return headphone;
     }
 
@@ -59,11 +59,11 @@ public class DateAboutContextUser {
         return latitude;
     }
 
-    public void setActivityU(String activityU) {
+    public void setActivityU(int activityU) {
         this.activityU = activityU;
     }
 
-    public void setHeadphone(String headphone) {
+    public void setHeadphone(int headphone) {
         this.headphone = headphone;
     }
 

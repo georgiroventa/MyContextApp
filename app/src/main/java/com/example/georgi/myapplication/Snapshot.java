@@ -256,7 +256,7 @@ public class Snapshot extends AppCompatDialog implements GoogleApiClient.Connect
                         HeadphoneState headphoneState = headphoneStateResult.getHeadphoneState();
 
                         //get the status
-                        String headphoneStatus = headphoneState.getState() == HeadphoneState.PLUGGED_IN ? "Plugged in" : "Unplugged";
+                        int headphoneStatus = headphoneState.getState() == HeadphoneState.PLUGGED_IN ? 1 : 0;
                         dateAboutContextUser.setHeadphone(headphoneStatus);
                         flag = flag | bit3;
                         save();
@@ -286,44 +286,44 @@ public class Snapshot extends AppCompatDialog implements GoogleApiClient.Connect
 
                         //set the activity name
                         switch (probableActivity.getType()) {
-                            case DetectedActivity.IN_VEHICLE:
-                                dateAboutContextUser.setActivityU("In vehicle");
-                                flag = flag | bit4;
-                               // mDatabase.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(timee).child("activity").setValue("In vehicle");
-                                break;
-
-                            case DetectedActivity.ON_BICYCLE:
-                                dateAboutContextUser.setActivityU("On bicycle");
-                                //mDatabase.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(timee).child("activity").setValue("On bicycle");
-                                flag = flag | bit4;
-                                break;
-
-                            case DetectedActivity.ON_FOOT:
-                                dateAboutContextUser.setActivityU("On foot");
-                                //mDatabase.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(timee).child("activity").setValue("On foot");
-                                flag = flag | bit4;
-                                break;
-
-                            case DetectedActivity.RUNNING:
-                                dateAboutContextUser.setActivityU("Running");
-                                //mDatabase.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(timee).child("activity").setValue("Running");
-                                flag = flag | bit4;
-                                break;
-
                             case DetectedActivity.STILL:
-                                dateAboutContextUser.setActivityU("Still");
+                                dateAboutContextUser.setActivityU(1);
                                 //mDatabase.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(timee).child("activity").setValue("Still");
                                 flag = flag | bit4;
                                 break;
 
                             case DetectedActivity.UNKNOWN:
-                                dateAboutContextUser.setActivityU("Unknown");
+                                dateAboutContextUser.setActivityU(2);
                                 //mDatabase.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(timee).child("activity").setValue("Unknown");
                                 flag = flag | bit4;
                                 break;
 
+                            case DetectedActivity.IN_VEHICLE:
+                                dateAboutContextUser.setActivityU(3);
+                                flag = flag | bit4;
+                               // mDatabase.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(timee).child("activity").setValue("In vehicle");
+                                break;
+
+                            case DetectedActivity.ON_BICYCLE:
+                                dateAboutContextUser.setActivityU(4);
+                                //mDatabase.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(timee).child("activity").setValue("On bicycle");
+                                flag = flag | bit4;
+                                break;
+
+                            case DetectedActivity.ON_FOOT:
+                                dateAboutContextUser.setActivityU(5);
+                                //mDatabase.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(timee).child("activity").setValue("On foot");
+                                flag = flag | bit4;
+                                break;
+
+                            case DetectedActivity.RUNNING:
+                                dateAboutContextUser.setActivityU(6);
+                                //mDatabase.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(timee).child("activity").setValue("Running");
+                                flag = flag | bit4;
+                                break;
+
                             case DetectedActivity.WALKING:
-                                dateAboutContextUser.setActivityU("Walking");
+                                dateAboutContextUser.setActivityU(7);
                                 flag = flag | bit4;
                                 //mDatabase.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(timee).child("activity").setValue("Walking");
                                 break;
