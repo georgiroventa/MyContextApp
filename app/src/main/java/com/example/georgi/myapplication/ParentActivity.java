@@ -50,7 +50,13 @@ public class ParentActivity extends AppCompatActivity
 
         getPermission();
 
-        if (mAuth.getCurrentUser() != null)  {
+        if (mAuth.getCurrentUser() == null) {
+            Intent intent = new Intent(ParentActivity.this, MainActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+        }
+        else {
             String uid = mAuth.getCurrentUser().getUid();
             final Button buttonU1 = (Button) findViewById(R.id.button_map);
             buttonU1.setOnClickListener(new View.OnClickListener() {
@@ -72,7 +78,7 @@ public class ParentActivity extends AppCompatActivity
                     startActivity(intent);
                 }
             });
-            final Button buttonU3 = (Button) findViewById(R.id.button_notifications);
+            final Button buttonU3 = (Button) findViewById(R.id.button_history);
             buttonU3.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -137,9 +143,9 @@ public class ParentActivity extends AppCompatActivity
                 }
             });
 
+            //call jobService
+            scheduleJob();
         }
-        //call jobService
-        scheduleJob();
 
     }
     @Override

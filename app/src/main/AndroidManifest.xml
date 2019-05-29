@@ -17,7 +17,7 @@
     <uses-permission android:name="android.permission.WAKE_LOCK" />
 
     <application
-        android:name=".Home"
+
         android:allowBackup="true"
         android:icon="@mipmap/rsz_1rsz_myicon"
         android:label="@string/app_name"
@@ -29,15 +29,15 @@
             android:enabled="true"
             android:exported="true" />
 
-        <activity android:name=".MainActivity">
+        <activity android:name=".ParentActivity"
+            android:label="@string/app_name">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
         <activity android:name=".RegisterActivity" />
-        <activity android:name=".ParentActivity" />
+        <activity android:name=".MainActivity" />
         <activity android:name=".RequestActivity" />
         <!--
              The API key for Google Maps-based APIs is defined as a string resource.

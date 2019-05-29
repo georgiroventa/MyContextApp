@@ -110,7 +110,7 @@ public class Snapshot extends AppCompatDialog implements GoogleApiClient.Connect
 
     DateAboutContextUser dateAboutContextUser = new DateAboutContextUser();
     String timee;
-    String dayWeek;
+    String day;
 
 
     private static Snapshot ourInstance = null;
@@ -148,11 +148,10 @@ public class Snapshot extends AppCompatDialog implements GoogleApiClient.Connect
 
     public String callSnapShotGroupApis() {
         Calendar calendar = Calendar.getInstance();
-        SimpleDateFormat format_time = new SimpleDateFormat("dd-MM-yyyy 'at' HH:mm:ss  ");
+        SimpleDateFormat format_time = new SimpleDateFormat("HH:mm:ss");
         timee = format_time.format(calendar.getTime());
-        SimpleDateFormat format_day = new SimpleDateFormat("EEEE");
-        dayWeek = format_day.format(new Date());
-        Log.i("Zi din saptamana", dayWeek);
+        SimpleDateFormat format_day = new SimpleDateFormat("yyyy-MM-dd");
+        day = format_day.format(new Date());
         buildApiClient();
 
         //get info about user's current activity
@@ -391,15 +390,15 @@ public class Snapshot extends AppCompatDialog implements GoogleApiClient.Connect
         public void save () {
             Log.i("Flag", String.valueOf(flag));
             if( flag == 31 ){
-                mDatabase.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(dayWeek).child(timee).child("temperature (°C)").setValue(dateAboutContextUser.getTemperature());
-                mDatabase.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(dayWeek).child(timee).child("humidity").setValue(dateAboutContextUser.getHumidity());
-                mDatabase.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(dayWeek).child(timee).child("latitude").setValue(dateAboutContextUser.getLatitude());
-                mDatabase.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(dayWeek).child(timee).child("longitude").setValue(dateAboutContextUser.getLongitude());
-                mDatabase.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(dayWeek).child(timee).child("headphone").setValue(dateAboutContextUser.getHeadphone());
-                mDatabase.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(dayWeek).child(timee).child("activity").setValue(dateAboutContextUser.getActivityU());
-                mDatabase.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(dayWeek).child(timee).child("timestamp").setValue(dateAboutContextUser.getTimestamp());
-                mDatabase.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(dayWeek).child(timee).child("time").setValue(dateAboutContextUser.getTime());
-                mDatabase.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(dayWeek).child(timee).child("timeslot").setValue(dateAboutContextUser.getTimeSlot());
+                mDatabase.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(day).child(timee).child("temperature (°C)").setValue(dateAboutContextUser.getTemperature());
+                mDatabase.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(day).child(timee).child("humidity").setValue(dateAboutContextUser.getHumidity());
+                mDatabase.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(day).child(timee).child("latitude").setValue(dateAboutContextUser.getLatitude());
+                mDatabase.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(day).child(timee).child("longitude").setValue(dateAboutContextUser.getLongitude());
+                mDatabase.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(day).child(timee).child("headphone").setValue(dateAboutContextUser.getHeadphone());
+                mDatabase.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(day).child(timee).child("activity").setValue(dateAboutContextUser.getActivityU());
+                mDatabase.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(day).child(timee).child("timestamp").setValue(dateAboutContextUser.getTimestamp());
+                mDatabase.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(day).child(timee).child("time").setValue(dateAboutContextUser.getTime());
+                mDatabase.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(day).child(timee).child("timeslot").setValue(dateAboutContextUser.getTimeSlot());
                 flag = 0x00;
                 String contextData = dateAboutContextUser.getActivityU() + "," + dateAboutContextUser.getTime() + "," +
                                     dateAboutContextUser.getTimestamp() + "," + dateAboutContextUser.getTimeSlot() + "," +

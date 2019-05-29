@@ -68,6 +68,13 @@ public class MainActivity extends Activity implements OnClickListener {
 
         mRef = FirebaseDatabase.getInstance().getReference().child("Users");
 
+        if(mAuth.getCurrentUser() != null){
+            Intent intent = new Intent(MainActivity.this, ParentActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+        }
+
     }
     @Override
     public void onStart() {

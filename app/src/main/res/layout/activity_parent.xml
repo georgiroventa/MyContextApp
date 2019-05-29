@@ -46,12 +46,12 @@
             android:textColor="@color/colorText" />
 
         <Button
-            android:id="@+id/button_notifications"
+            android:id="@+id/button_history"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_below="@+id/button_children"
             android:background="@color/colorBackground"
-            android:text="Notifications"
+            android:text="History"
             android:textAllCaps="false"
             android:textColor="@color/colorText" />
 

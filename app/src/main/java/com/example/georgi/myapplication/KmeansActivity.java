@@ -1,9 +1,14 @@
 package com.example.georgi.myapplication;
 
+import android.content.Intent;
 import android.support.annotation.NonNull;
+import android.support.design.widget.BottomNavigationView;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.widget.TextView;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
@@ -17,49 +22,87 @@ import java.util.Date;
 
 public class KmeansActivity extends AppCompatActivity {
 
-    SimpleDateFormat format_day = new SimpleDateFormat("EEEE");
-    String dayWeek = format_day.format(new Date());
+    SimpleDateFormat format_day = new SimpleDateFormat("yyyy-MM-dd");
+    String day = format_day.format(new Date());
+
     //reference to database
-    private DatabaseReference mDatabase = FirebaseDatabase.getInstance().getReference().child("DateAboutContextUser").child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child("Wednesday");
-    private float array_latitude[]/*= new float[]{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}*/;
+    private DatabaseReference mDatabase = FirebaseDatabase.getInstance().getReference().child("DateAboutContextUser").child(FirebaseAuth.getInstance().getCurrentUser().getUid());
+    private float array_latitude[];
     private float array_longitude[];
     private float array_temperature[];
     private float array_humidity[];
     private float array_activity[];
-    private float array_headphone[];
+    private float array_timestamp[];
 
+    private float matrix_latitude[][];
+    private float matrix_longitude[][];
+    private float matrix_temperture[][];
+    private float matrix_humidity[][];
+    private float matrix_activity[][];
+    public  static float clusters[][] = new float[2][5];
+
+    //the history of clusters
+    private String history_clusters = "";
+    TextView history;
+
+    //verify if all data is available
     int flag = 0;
-    float centroid_latitude[][] = new float[][]{
-            {0,0},
-            {45.75293350f,45.7497520f}
-    };
-    float centroid_longitude[][] = new float[][]{
-            {0,0},
-            {21.25074195f,21.24320220f}
-    };
-    float centroid_temperature[][] = new float[][]{
-            {0,0},
-            {10.0f,8.0f}
-    };
-    float centroid_humidity[][] = new float[][]{
-            {0,0},
-            {100.0f,99.0f}
-    };
-    float centroid_activity[][] = new float[][]{
-            {0,0},
-            {45.7496032f,45.74958038f}
-    };
-    float centroid_headphone[][] = new float[][]{
-            {0,0},
-            {45.7496032f,45.74958038f}
-    };
+
+    float centroid_latitude[][];
+    float centroid_longitude[][];
+    float centroid_temperature[][];
+    float centroid_humidity[][];
+    float centroid_activity[][];
+
+    //number of clusters
     int noOfClusters=2;
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_kmeans);
         colectData();
+        history = (TextView)findViewById(R.id.tv_history);
+
+        //bottom navigation view
+        BottomNavigationView bottomNavigationView = (BottomNavigationView) findViewById(R.id.bottomNavView_Bar);
+        Menu menu = bottomNavigationView.getMenu();
+        MenuItem menuItem = menu.getItem(0);
+        menuItem.setChecked(true);
+
+        bottomNavigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
+            @Override
+            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+                switch (item.getItemId()){
+
+                    case R.id.nav_home:
+                        Intent intent0 = new Intent(KmeansActivity.this, ParentActivity.class);
+                        startActivity(intent0);
+                        break;
+                    case R.id.nav_map:
+                        Intent intent1 = new Intent(KmeansActivity.this, MapsActivity.class);
+                        startActivity(intent1);
+                        break;
+                    case R.id.nav_noise:
+                        Intent intent2 = new Intent(KmeansActivity.this, NoiseLevelActivity.class);
+                        startActivity(intent2);
+                        break;
+                    case R.id.nav_coordinates:
+                        Intent intent3 = new Intent(KmeansActivity.this, RequestActivity.class);
+                        startActivity(intent3);
+                        break;
+
+                    case R.id.nav_notification:
+                        Intent intent4 = new Intent(KmeansActivity.this, NotificationsActivity.class);
+                        startActivity(intent4);
+                        break;
+
+                }
+                return false;
+            }
+        });
 
     }
 
@@ -83,8 +126,8 @@ public class KmeansActivity extends AppCompatActivity {
         return array_activity;
     }
 
-    public float[] getArray_headphone() {
-        return array_headphone;
+    public float[] getArray_timestamp() {
+        return array_timestamp;
     }
 
     public void setArray_latitude(float[] array_latitude) {
@@ -107,53 +150,102 @@ public class KmeansActivity extends AppCompatActivity {
         this.array_activity = array_activity;
     }
 
-    public void setArray_headphone(float[] array_headphone) {
-        this.array_headphone = array_headphone;
+    public void setArray_timestamp(float[] array_timestamp) {
+        this.array_timestamp = array_timestamp;
     }
 
     public void colectData(){
         mDatabase.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-
-                Log.i("blablaa", String.valueOf(dataSnapshot.getChildrenCount()));
-                //Log.i("blablaa11", String.valueOf(dataSnapshot.getChildren()));
+                int no = 0;
+                for(DataSnapshot number : dataSnapshot.getChildren()){
+                    no += number.getChildrenCount();
+                }
+                Log.i("Numar de zile", String.valueOf(dataSnapshot.getChildrenCount()));
                 int i = 0;
-                //intialize the matrix
-                array_latitude = new float[(int)dataSnapshot.getChildrenCount()];
-                array_longitude = new float[(int)dataSnapshot.getChildrenCount()];
-                array_temperature = new float[(int)dataSnapshot.getChildrenCount()];
-                array_humidity = new float[(int)dataSnapshot.getChildrenCount()];
-                array_activity = new float[(int)dataSnapshot.getChildrenCount()];
-                array_headphone = new float[(int)dataSnapshot.getChildrenCount()];
-                for(DataSnapshot result : dataSnapshot.getChildren()){
-                    //Log.i("copii", result.getKey().toString());
-                    //Log.i("cevaaa1", String.valueOf(result.child("latitude").getValue(Double.class)));
-                    float latitude = result.child("latitude").getValue(Double.class).floatValue();
-                    array_latitude[i] = latitude;
-                    float longitude = result.child("longitude").getValue(Double.class).floatValue();
-                    array_longitude[i] = longitude;
-                    float temperature = result.child("temperature (°C)").getValue(Double.class).floatValue();
-                    array_temperature[i] = temperature;
-                    float humidity = result.child("humidity").getValue(Double.class).floatValue();
-                    array_humidity[i] = humidity;
-//                    float activity = result.child("activity").getValue(Double.class).floatValue();
-//                    array_longitude[i] = activity;
-//                    float headphone = result.child("headphone").getValue(Double.class).floatValue();
-//                    array_longitude[i] = headphone;
-                    //Log.i("din vector", String.valueOf(matrix[i]));
-                    //setMatrix(elem,i);
 
-                    i++;
+                //intialize the arrays
+                array_latitude = new float[no];
+                array_longitude = new float[no];
+                array_temperature = new float[no];
+                array_humidity = new float[no];
+                array_activity = new float[no];
+                array_timestamp = new float[no];
+
+                //initialize the matrices
+                matrix_latitude = new float[noOfClusters][no];
+                matrix_longitude = new float[noOfClusters][no];
+                matrix_temperture = new float[noOfClusters][no];
+                matrix_humidity = new float[noOfClusters][no];
+                matrix_activity = new float[noOfClusters][no];
+
+                for(DataSnapshot some : dataSnapshot.getChildren()) {
+                    for (DataSnapshot result : some.getChildren()) {
+                        //Log.i("copii", result.getKey().toString());
+                        //Log.i("cevaaa1", String.valueOf(result.child("latitude").getValue(Double.class)));
+                        float latitude = result.child("latitude").getValue(Double.class).floatValue();
+                        array_latitude[i] = latitude;
+                        float longitude = result.child("longitude").getValue(Double.class).floatValue();
+                        array_longitude[i] = longitude;
+                        float temperature = result.child("temperature (°C)").getValue(Double.class).floatValue();
+                        array_temperature[i] = temperature;
+                        float humidity = result.child("humidity").getValue(Double.class).floatValue();
+                        array_humidity[i] = humidity;
+                        float activity = result.child("activity").getValue(Double.class).floatValue();
+                        array_activity[i] = activity;
+                        //float timestamp = result.child("timestamp").getValue(Long.class).floatValue();
+                        //array_timestamp[i] = timestamp;
+
+                        i++;
+                    }
                 }
                 setArray_latitude(array_latitude);
                 setArray_longitude(array_longitude);
                 setArray_temperature(array_temperature);
                 setArray_humidity(array_humidity);
                 setArray_activity(array_activity);
-                setArray_headphone(array_headphone);
+                //setArray_timestamp(array_timestamp);
+
+                float min_lat = min_function(array_latitude);
+                System.out.println(min_lat + "min_lat");
+                float max_lat = max_function(array_latitude);
+                System.out.println(max_lat + "max_lat");
+                centroid_latitude = new float[][]{
+                        {0,0},
+                        {min_lat,max_lat}
+                };
+
+                float min_long = min_function(array_longitude);
+                float max_long = max_function(array_longitude);
+                centroid_longitude = new float[][]{
+                        {0,0},
+                        {min_long,max_long}
+                };
+
+                float min_temp = min_function(array_temperature);
+                float max_temp = max_function(array_temperature);
+                centroid_temperature = new float[][]{
+                        {0,0},
+                        {min_temp,max_temp}
+                };
+
+                float min_humidity = min_function(array_humidity);
+                float max_humidity = max_function(array_humidity);
+                centroid_humidity = new float[][]{
+                        {0,0},
+                        {min_humidity,max_humidity}
+                };
+
+                float min_activity = min_function(array_activity);
+                float max_activity = max_function(array_activity);
+                centroid_activity = new float[][]{
+                        {0,0},
+                        {min_activity,max_activity}
+                };
 
                 flag = 1;
+
                 verify();
             }
 
@@ -170,25 +262,203 @@ public class KmeansActivity extends AppCompatActivity {
         if (flag == 1){
             System.out.println("latitudine");
             System.out.println("======================================== ");
-            getCentroid(array_latitude, noOfClusters, centroid_latitude);
+            float m1[][] = getCentroid(matrix_latitude, array_latitude, noOfClusters, centroid_latitude);
+            for(int i = 0; i < matrix_latitude.length; i++){
+                for(int j = 0; j < matrix_latitude[i].length; j++){
+                    System.out.print(matrix_latitude[i][j] + ",");
+                }
+                System.out.println();
+            }
+            int lat = closest(m1[1][0], array_latitude);
+            System.out.println( "LATITUDINE" + array_latitude[lat]);
+            clusters[0][0] = m1[1][0];
+            clusters[1][0] = m1[1][1];
+
             System.out.println("longitudine");
             System.out.println("======================================== ");
-            getCentroid(array_longitude, noOfClusters, centroid_longitude);
+            float m2[][] = getCentroid(matrix_longitude, array_longitude, noOfClusters, centroid_longitude);
+            for(int i = 0; i < matrix_longitude.length; i++){
+                for(int j = 0; j < matrix_longitude[i].length; j++){
+                    System.out.print(matrix_longitude[i][j] + ",");
+                }
+                System.out.println();
+            }
+            int longi = closest(m2[1][0], array_longitude);
+            System.out.println("LONGITUDINE" + array_longitude[longi]);
+            //clusters[0][0] = m1[1][0];
+            //clusters[1][0] = m1[1][1];
+
+
             System.out.println("temperatura");
             System.out.println("======================================== ");
-            getCentroid(array_temperature, noOfClusters, centroid_temperature);
+            float m3[][] = getCentroid(matrix_temperture, array_temperature, noOfClusters, centroid_temperature);
+            for(int i = 0; i < matrix_temperture.length; i++){
+                for(int j = 0; j < matrix_temperture[i].length; j++){
+                    System.out.print(matrix_temperture[i][j] + ",");
+                }
+                System.out.println();
+            }
+            int temp = closest(m3[1][0], array_temperature);
+            System.out.println("TEMPERATURA" + array_temperature[temp]);
+            //clusters[0][0] = m1[1][0];
+            //clusters[1][0] = m1[1][1];
+
+
             System.out.println("humidity");
             System.out.println("======================================== ");
-            getCentroid(array_humidity, noOfClusters, centroid_humidity);
-            //getCentroid(array_activity, noOfClusters, centroid_activity);
-            //getCentroid(array_headphone, noOfClusters, centroid_headphone);
+            float m4[][] = getCentroid(matrix_humidity, array_humidity, noOfClusters, centroid_humidity);
+            for(int i = 0; i < matrix_humidity.length; i++){
+                for(int j = 0; j < matrix_humidity[i].length; j++){
+                    System.out.print(matrix_humidity[i][j] + ",");
+                }
+                System.out.println();
+            }
+            int hum = closest(m4[1][0], array_humidity);
+            System.out.println("HUMIDITY" + array_humidity[hum]);
+            //clusters[0][0] = m1[1][0];
+            //clusters[1][0] = m1[1][1];
 
+            System.out.println("activity");
+            System.out.println("======================================== ");
+            float m5[][] = getCentroid(matrix_activity, array_activity, noOfClusters, centroid_activity);
+            for(int i = 0; i < matrix_activity.length; i++){
+                for(int j = 0; j < matrix_activity[i].length; j++){
+                    System.out.print(matrix_activity[i][j] + ",");
+                }
+                System.out.println();
+            }
+            int act = closest(m5[1][0], array_humidity);
+            System.out.println("ACTIVITY" + array_humidity[act]);
+
+
+            for(int i = 0; i < matrix_longitude.length - 1; i++){
+                int flag = 0;
+                for(int j = 0; j < matrix_longitude[i].length; j++){
+                    if(array_longitude[lat] == matrix_longitude[i][j]){
+                        flag = 1;
+                    }
+                    if(flag == 1){
+                        clusters[0][1] = m2[1][0];
+                        clusters[1][1] = m2[1][1];
+                    }
+                    else
+                    {
+                        clusters[0][1] = m2[1][1];
+                        clusters[1][1] = m2[1][0];
+                    }
+                }
+            }
+            for(int i = 0; i < matrix_temperture.length - 1; i++){
+                int flag = 0;
+                for(int j = 0; j < matrix_temperture[i].length; j++){
+                    if(array_temperature[lat] == matrix_temperture[i][j]){
+                        flag = 1;
+                    }
+                    if(flag == 1){
+                        clusters[0][2] = m3[1][0];
+                        clusters[1][2] = m3[1][1];
+                    }
+                    else
+                    {
+                        clusters[0][2] = m3[1][1];
+                        clusters[1][2] = m3[1][0];
+                    }
+                }
+            }
+            for(int i = 0; i < matrix_humidity.length - 1; i++){
+                int flag = 0;
+                for(int j = 0; j < matrix_humidity[i].length; j++){
+                    if(array_humidity[lat] == matrix_humidity[i][j]){
+                        flag = 1;
+                    }
+                    if(flag == 1){
+                        clusters[0][3] = m4[1][0];
+                        clusters[1][3] = m4[1][1];
+                    }
+                    else
+                    {
+                        clusters[0][3] = m4[1][1];
+                        clusters[1][3] = m4[1][0];
+                    }
+                }
+            }
+            for(int i = 0; i < matrix_activity.length - 1; i++){
+                int flag = 0;
+                for(int j = 0; j < matrix_activity[i].length; j++){
+                    if(array_activity[lat] == matrix_activity[i][j]){
+                        flag = 1;
+                    }
+                    if(flag == 1){
+                        clusters[0][4] = m5[1][0];
+                        clusters[1][4] = m5[1][1];
+                    }
+                    else
+                    {
+                        clusters[0][4] = m5[1][1];
+                        clusters[1][4] = m5[1][0];
+                    }
+                }
+            }
+
+            for(int i = 0; i < clusters.length; i++ ){
+                history_clusters += "         Cluster" + (i+1) + "\n";
+                System.out.print("Cluster" + (i+1) + ": ");
+                for(int j = 0; j < clusters[i].length; j++){
+                    System.out.print(clusters[i][j] + "  ");
+                   history_clusters += clusters[i][j] + "  ";
+                }
+                System.out.println();
+                history_clusters += "\n\n\n";
+            }
+            history.setText(history_clusters);
+            flag = 0;
         }
+
+    }
+
+    public int closest(float x, float array[]){
+        float distance = 100.0f;
+        int j = 0;
+        for(int i = 0; i < array.length; i++){
+            if(array[i] > x){
+                if((array[i] - x) < distance){
+                    distance = array[i] - x;
+                    j = i;
+                }
+            }
+            else
+            {
+                if((x - array[i]) < distance)
+                distance = x - array[i];
+                j = i;
+            }
+        }
+        return j;
+    }
+
+    public float min_function(float array[]){
+        float min = 100.0f;
+        for(int i = 0; i < array.length; i++){
+            if(array[i] < min){
+                min = array[i];
+            }
+        }
+        return min;
+    }
+
+    public float max_function(float array[]){
+        float max = 0.0f;
+        for(int i = 0; i < array.length; i++){
+            if(array[i] > max){
+                max = array[i];
+            }
+        }
+        return max;
     }
 
 
     //determine the centroids
-    public static float[][] getCentroid(float data[],int noofclusters,float centroid[][]){
+    public static float[][] getCentroid(float matrix[][], float data[],int noofclusters,float centroid[][]){
 
         float distance[][]=new float[noofclusters][data.length];
         float cluster[]=new float[data.length];
@@ -213,8 +483,6 @@ public class KmeansActivity extends AppCompatActivity {
             centroid[1][smallerDistance]=centroid[1][smallerDistance]+data[j];
             clusternodecount[smallerDistance]=clusternodecount[smallerDistance]+1;
             cluster[j]=smallerDistance;
-
-
         }
 
         for(int j=0;j<noofclusters;j++){
@@ -232,7 +500,7 @@ public class KmeansActivity extends AppCompatActivity {
 
         if(!isAchived){
 
-            getCentroid(data,noofclusters,centroid);
+            getCentroid(matrix,data,noofclusters,centroid);
         }
 
         if(isAchived){
@@ -240,8 +508,10 @@ public class KmeansActivity extends AppCompatActivity {
             for(int i=0;i<noofclusters;i++){
                 System.out.print("C"+(i+1)+":");
                 for(int j=0;j<data.length;j++){
-                    if(cluster[j]==i)
-                        System.out.print(data[j]+" ,");
+                    if(cluster[j]==i) {
+                        matrix[i][j] = data[j];
+                        System.out.print(data[j] + " ,");
+                    }
 
                 }
                 System.out.println();
@@ -255,5 +525,11 @@ public class KmeansActivity extends AppCompatActivity {
 
         return centroid;
 
+    }
+    @Override
+    public void onBackPressed() {
+        Intent intent=new Intent(KmeansActivity.this,ParentActivity.class);
+        startActivity(intent);
+        finish();
     }
 }

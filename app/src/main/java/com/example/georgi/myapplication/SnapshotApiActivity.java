@@ -99,9 +99,9 @@ public class SnapshotApiActivity extends AppCompatActivity {
 
     private Kmeans kmeans;
 
-    SimpleDateFormat format_day = new SimpleDateFormat("EEEE");
-    String dayWeek = format_day.format(new Date());
-    private DatabaseReference mDatabase = FirebaseDatabase.getInstance().getReference().child("DateAboutContextUser").child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(dayWeek);
+    SimpleDateFormat format_day = new SimpleDateFormat("yyyy-MM-dd");
+    String day = format_day.format(new Date());
+    private DatabaseReference mDatabase = FirebaseDatabase.getInstance().getReference().child("DateAboutContextUser").child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(day);
 
 
     @Override
@@ -151,8 +151,10 @@ public class SnapshotApiActivity extends AppCompatActivity {
         for ( int a  = 0; a < means.size(); a++){
             Kmeans.Mean mean = means.get(a);
             float[] c = mean.getCentroid();
+            System.out.println("Mean" + mean.getCentroid());
             for(int b = 0; b < c.length; b++) {
                 float x = mean.mCentroid[b];
+                System.out.println("Elemente din Mean" + x);
                 float ab = x;
             }
 

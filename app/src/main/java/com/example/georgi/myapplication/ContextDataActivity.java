@@ -28,9 +28,9 @@ public class ContextDataActivity extends AppCompatActivity {
     private TextView weather_tv, location_tv, headphone_tv, time_slot_tv;
     private Button button;
 
-    SimpleDateFormat format_day = new SimpleDateFormat("EEEE");
-    String dayWeek = format_day.format(new Date());
-    private DatabaseReference mDatabase = FirebaseDatabase.getInstance().getReference().child("DateAboutContextUser").child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(dayWeek);
+    SimpleDateFormat format_day = new SimpleDateFormat("yyyy-MM-dd");
+    String day = format_day.format(new Date());
+    private DatabaseReference mDatabase = FirebaseDatabase.getInstance().getReference().child("DateAboutContextUser").child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(day);
 
 
     @Override
@@ -67,8 +67,37 @@ public class ContextDataActivity extends AppCompatActivity {
                     date_time_tv.setText("Date and current time: " + time_dateDb);
 
                     //display user's activity
-                    String activityDb = dataSnapshot.child("activity").getValue(String.class);
-                    activity_tv.setText("User's activity: " + activityDb);
+
+                    Integer activityDb = dataSnapshot.child("activity").getValue(Integer.class).intValue();
+                    String activityDb_type = "";
+                    if(activityDb == 1){
+                        activityDb_type = "Still";
+                    }
+                    else
+                    if(activityDb == 2){
+                        activityDb_type = "Unknown";
+                    }
+                    else
+                    if(activityDb == 3){
+                        activityDb_type = "In vehicle";
+                    }
+                    else
+                    if(activityDb == 4){
+                        activityDb_type = "On bicycle";
+                    }
+                    else
+                    if(activityDb == 5){
+                        activityDb_type = "On foot";
+                    }
+                    else
+                    if(activityDb == 6){
+                        activityDb_type = "Running";
+                    }
+                    else
+                    if(activityDb == 7){
+                        activityDb_type = "Walking";
+                    }
+                    activity_tv.setText("User's activity: " + activityDb_type);
 
                     //display time in seconds
                     Long time_secDb = dataSnapshot.child("timestamp").getValue(Long.class);
@@ -83,8 +112,14 @@ public class ContextDataActivity extends AppCompatActivity {
                     time_slot_tv.setText("Time slot: " + timeSlotDb);
 
                     //display status phone
-                    String headphoneDb = dataSnapshot.child("headphone").getValue(String.class);
-                    headphone_tv.setText("Headphone status: " + headphoneDb);
+                    Integer headphoneStatusDb = dataSnapshot.child("headphone").getValue(Integer.class).intValue();
+                    if(headphoneStatusDb == 1){
+                        headphone_tv.setText("Headphone status: " + "Plugged in");
+                    }
+                    else
+                    {
+                        headphone_tv.setText("Headphone status: " + "Unplugged");
+                    }
 
                     //dispaly location in latitude and longitude
                     Double latitudeDb = dataSnapshot.child("latitude").getValue(Double.class);
