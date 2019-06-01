@@ -17,56 +17,26 @@ import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.location.ActivityRecognitionResult;
 import com.google.android.gms.location.DetectedActivity;
 
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
-import android.app.job.JobInfo;
-import android.app.job.JobScheduler;
-import android.content.ComponentName;
+
 import android.content.Context;
 import android.content.DialogInterface;
-import android.location.Location;
 import android.os.Bundle;
-import android.os.PersistableBundle;
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatDialog;
-import android.util.Log;
-import android.widget.TextView;
-import android.widget.Toast;
 
 
-import com.google.android.gms.awareness.Awareness;
-import com.google.android.gms.awareness.snapshot.DetectedActivityResult;
-import com.google.android.gms.awareness.snapshot.HeadphoneStateResult;
-import com.google.android.gms.awareness.snapshot.LocationResult;
-import com.google.android.gms.awareness.snapshot.WeatherResult;
-import com.google.android.gms.awareness.state.HeadphoneState;
-import com.google.android.gms.awareness.state.Weather;
-import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.common.api.ResultCallback;
-import com.google.android.gms.location.ActivityRecognitionResult;
-import com.google.android.gms.location.DetectedActivity;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.squareup.picasso.Picasso;
-
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Locale;
-
-import static android.content.Context.JOB_SCHEDULER_SERVICE;
-import static android.content.Context.MODE_PRIVATE;
 
 // a java class of singleton type
 
@@ -76,7 +46,7 @@ public class Snapshot extends AppCompatDialog implements GoogleApiClient.Connect
     private GoogleApiClient mGoogleApiClient;
     private FirebaseAuth mAuth =  FirebaseAuth.getInstance();;
     private FirebaseDatabase database = FirebaseDatabase.getInstance();;
-    private DatabaseReference mDatabase = database.getReference().child("DateAboutContextUser");
+    private DatabaseReference mDatabase = database.getReference().child("DataAboutContextUser");
     FirebaseUser firebaseUser = mAuth.getCurrentUser();;
     private static Context context;
 
@@ -108,7 +78,7 @@ public class Snapshot extends AppCompatDialog implements GoogleApiClient.Connect
     final int bit4 = 0x08;
     final int bit5 = 0x10;
 
-    DateAboutContextUser dateAboutContextUser = new DateAboutContextUser();
+    DataAboutContextUser dataAboutContextUser = new DataAboutContextUser();
     String timee;
     String day;
 
@@ -192,14 +162,14 @@ public class Snapshot extends AppCompatDialog implements GoogleApiClient.Connect
                         String weatherReport = "Temperature: " + weather.getTemperature(Weather.CELSIUS)
                                 + "\nHumidity: " + weather.getHumidity();
                         int temperature = (int) weather.getTemperature(Weather.CELSIUS);
-                        dateAboutContextUser.setTemperature(temperature);
-                        Log.i("temppp_context", String.valueOf(dateAboutContextUser.getTemperature()));
+                        dataAboutContextUser.setTemperature(temperature);
+                        Log.i("temppp_context", String.valueOf(dataAboutContextUser.getTemperature()));
                         int humidity = weather.getHumidity();
 
 
-                        dateAboutContextUser.setHumidity(humidity);
+                        dataAboutContextUser.setHumidity(humidity);
                         flag = flag | bit1;
-                        Log.i("humidity_context", String.valueOf(dateAboutContextUser.getHumidity()));
+                        Log.i("humidity_context", String.valueOf(dataAboutContextUser.getHumidity()));
                         save();
                         //mDatabase.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(timee).child("temperature (°C)").setValue(temperature);
                         //mDatabase.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(timee).child("humidity").setValue(humidity);
@@ -228,9 +198,9 @@ public class Snapshot extends AppCompatDialog implements GoogleApiClient.Connect
                         Location location = locationResult.getLocation();
                         String loc = "Latitudine: "+ location.getLatitude() + ",Longitudine: " + location.getLongitude();
                         float latitude = (float) location.getLatitude();
-                        dateAboutContextUser.setLatitude(latitude);
+                        dataAboutContextUser.setLatitude(latitude);
                         float longitude = (float) location.getLongitude();
-                        dateAboutContextUser.setLongitude(longitude);
+                        dataAboutContextUser.setLongitude(longitude);
                         flag = flag | bit2;
                         save();
                         //mDatabase.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(timee).child("latitude").setValue(latitude);
@@ -256,7 +226,7 @@ public class Snapshot extends AppCompatDialog implements GoogleApiClient.Connect
 
                         //get the status
                         int headphoneStatus = headphoneState.getState() == HeadphoneState.PLUGGED_IN ? 1 : 0;
-                        dateAboutContextUser.setHeadphone(headphoneStatus);
+                        dataAboutContextUser.setHeadphone(headphoneStatus);
                         flag = flag | bit3;
                         save();
                        // mDatabase.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(timee).child("headphone").setValue(headphoneStatus);
@@ -286,43 +256,43 @@ public class Snapshot extends AppCompatDialog implements GoogleApiClient.Connect
                         //set the activity name
                         switch (probableActivity.getType()) {
                             case DetectedActivity.STILL:
-                                dateAboutContextUser.setActivityU(1);
+                                dataAboutContextUser.setActivityU(1);
                                 //mDatabase.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(timee).child("activity").setValue("Still");
                                 flag = flag | bit4;
                                 break;
 
                             case DetectedActivity.UNKNOWN:
-                                dateAboutContextUser.setActivityU(2);
+                                dataAboutContextUser.setActivityU(2);
                                 //mDatabase.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(timee).child("activity").setValue("Unknown");
                                 flag = flag | bit4;
                                 break;
 
                             case DetectedActivity.IN_VEHICLE:
-                                dateAboutContextUser.setActivityU(3);
+                                dataAboutContextUser.setActivityU(3);
                                 flag = flag | bit4;
                                // mDatabase.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(timee).child("activity").setValue("In vehicle");
                                 break;
 
                             case DetectedActivity.ON_BICYCLE:
-                                dateAboutContextUser.setActivityU(4);
+                                dataAboutContextUser.setActivityU(4);
                                 //mDatabase.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(timee).child("activity").setValue("On bicycle");
                                 flag = flag | bit4;
                                 break;
 
                             case DetectedActivity.ON_FOOT:
-                                dateAboutContextUser.setActivityU(5);
+                                dataAboutContextUser.setActivityU(5);
                                 //mDatabase.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(timee).child("activity").setValue("On foot");
                                 flag = flag | bit4;
                                 break;
 
                             case DetectedActivity.RUNNING:
-                                dateAboutContextUser.setActivityU(6);
+                                dataAboutContextUser.setActivityU(6);
                                 //mDatabase.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(timee).child("activity").setValue("Running");
                                 flag = flag | bit4;
                                 break;
 
                             case DetectedActivity.WALKING:
-                                dateAboutContextUser.setActivityU(7);
+                                dataAboutContextUser.setActivityU(7);
                                 flag = flag | bit4;
                                 //mDatabase.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(timee).child("activity").setValue("Walking");
                                 break;
@@ -352,9 +322,9 @@ public class Snapshot extends AppCompatDialog implements GoogleApiClient.Connect
                         }
                         Log.i("minute", String.valueOf(minutes));
                         Log.i("TimeSlot", String.valueOf(timeSlot));
-                        dateAboutContextUser.setTimeFormat(timeFormat);
-                        dateAboutContextUser.setTimestamp(data);
-                        dateAboutContextUser.setTimeSlot(timeSlot);
+                        dataAboutContextUser.setTimeFormat(timeFormat);
+                        dataAboutContextUser.setTimestamp(data);
+                        dataAboutContextUser.setTimeSlot(timeSlot);
                         flag = flag | bit5;
                         save();
                         //mDatabase.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(timee).child("time").setValue(sdf);
@@ -390,21 +360,21 @@ public class Snapshot extends AppCompatDialog implements GoogleApiClient.Connect
         public void save () {
             Log.i("Flag", String.valueOf(flag));
             if( flag == 31 ){
-                mDatabase.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(day).child(timee).child("temperature (°C)").setValue(dateAboutContextUser.getTemperature());
-                mDatabase.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(day).child(timee).child("humidity").setValue(dateAboutContextUser.getHumidity());
-                mDatabase.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(day).child(timee).child("latitude").setValue(dateAboutContextUser.getLatitude());
-                mDatabase.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(day).child(timee).child("longitude").setValue(dateAboutContextUser.getLongitude());
-                mDatabase.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(day).child(timee).child("headphone").setValue(dateAboutContextUser.getHeadphone());
-                mDatabase.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(day).child(timee).child("activity").setValue(dateAboutContextUser.getActivityU());
-                mDatabase.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(day).child(timee).child("timestamp").setValue(dateAboutContextUser.getTimestamp());
-                mDatabase.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(day).child(timee).child("time").setValue(dateAboutContextUser.getTime());
-                mDatabase.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(day).child(timee).child("timeslot").setValue(dateAboutContextUser.getTimeSlot());
+                mDatabase.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(day).child(timee).child("temperature (°C)").setValue(dataAboutContextUser.getTemperature());
+                mDatabase.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(day).child(timee).child("humidity").setValue(dataAboutContextUser.getHumidity());
+                mDatabase.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(day).child(timee).child("latitude").setValue(dataAboutContextUser.getLatitude());
+                mDatabase.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(day).child(timee).child("longitude").setValue(dataAboutContextUser.getLongitude());
+                mDatabase.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(day).child(timee).child("headphone").setValue(dataAboutContextUser.getHeadphone());
+                mDatabase.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(day).child(timee).child("activity").setValue(dataAboutContextUser.getActivityU());
+                mDatabase.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(day).child(timee).child("timestamp").setValue(dataAboutContextUser.getTimestamp());
+                mDatabase.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(day).child(timee).child("time").setValue(dataAboutContextUser.getTime());
+                mDatabase.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(day).child(timee).child("timeslot").setValue(dataAboutContextUser.getTimeSlot());
                 flag = 0x00;
-                String contextData = dateAboutContextUser.getActivityU() + "," + dateAboutContextUser.getTime() + "," +
-                                    dateAboutContextUser.getTimestamp() + "," + dateAboutContextUser.getTimeSlot() + "," +
-                                    dateAboutContextUser.getHeadphone() + "," + dateAboutContextUser.getLatitude() + "," +
-                                    dateAboutContextUser.getLongitude() + "," + dateAboutContextUser.getHumidity() + "," +
-                                    dateAboutContextUser.getTemperature() + "\n";
+                String contextData = dataAboutContextUser.getActivityU() + "," + dataAboutContextUser.getTime() + "," +
+                                    dataAboutContextUser.getTimestamp() + "," + dataAboutContextUser.getTimeSlot() + "," +
+                                    dataAboutContextUser.getHeadphone() + "," + dataAboutContextUser.getLatitude() + "," +
+                                    dataAboutContextUser.getLongitude() + "," + dataAboutContextUser.getHumidity() + "," +
+                                    dataAboutContextUser.getTemperature() + "\n";
 
                 try {
                     File f = new File(Environment.getExternalStorageDirectory().getAbsolutePath()+"/ContextApp/" + "/TestFile/" + "DataContextClient.csv" );

@@ -27,10 +27,12 @@ public class ContextDataActivity extends AppCompatActivity {
     private TextView date_time_tv, activity_tv, time_sec_tv, date_format_tv;
     private TextView weather_tv, location_tv, headphone_tv, time_slot_tv;
     private Button button;
+    Integer activityDb = 0;
+    Integer headphoneStatusDb = 0;
 
     SimpleDateFormat format_day = new SimpleDateFormat("yyyy-MM-dd");
     String day = format_day.format(new Date());
-    private DatabaseReference mDatabase = FirebaseDatabase.getInstance().getReference().child("DateAboutContextUser").child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(day);
+    private DatabaseReference mDatabase = FirebaseDatabase.getInstance().getReference().child("DataAboutContextUser").child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(day);
 
 
     @Override
@@ -67,8 +69,9 @@ public class ContextDataActivity extends AppCompatActivity {
                     date_time_tv.setText("Date and current time: " + time_dateDb);
 
                     //display user's activity
-
-                    Integer activityDb = dataSnapshot.child("activity").getValue(Integer.class).intValue();
+                    if(dataSnapshot.child("activity").getValue(Integer.class) != null) {
+                        Integer activityDb = dataSnapshot.child("activity").getValue(Integer.class).intValue();
+                    }
                     String activityDb_type = "";
                     if(activityDb == 1){
                         activityDb_type = "Still";
@@ -112,7 +115,10 @@ public class ContextDataActivity extends AppCompatActivity {
                     time_slot_tv.setText("Time slot: " + timeSlotDb);
 
                     //display status phone
-                    Integer headphoneStatusDb = dataSnapshot.child("headphone").getValue(Integer.class).intValue();
+                    if(dataSnapshot.child("headphone").getValue(Integer.class) != null){
+                        headphoneStatusDb = dataSnapshot.child("headphone").getValue(Integer.class).intValue();
+                    }
+
                     if(headphoneStatusDb == 1){
                         headphone_tv.setText("Headphone status: " + "Plugged in");
                     }
@@ -134,8 +140,8 @@ public class ContextDataActivity extends AppCompatActivity {
                     weather_tv.setText("Current weather\n" + weatherDb);
 
 
-                    Log.i("User activity", dataSnapshot.child("activity").getValue().toString());
-                    Log.i("Time in seconds", dataSnapshot.child("time").getValue().toString());
+                 //   Log.i("User activity", dataSnapshot.child("activity").getValue().toString());
+                 //   Log.i("Time in seconds", dataSnapshot.child("time").getValue().toString());
 
             }
 

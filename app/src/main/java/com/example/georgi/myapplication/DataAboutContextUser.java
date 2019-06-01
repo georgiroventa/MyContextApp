@@ -2,18 +2,18 @@ package com.example.georgi.myapplication;
 
 import java.text.SimpleDateFormat;
 
-public class DateAboutContextUser {
+public class DataAboutContextUser {
     private int activityU, headphone;
     private long timestamp, time;
     private int humidity, temperature;
     private float longitude, latitude;
     private double timeSlot;
 
-    public DateAboutContextUser(){
+    public DataAboutContextUser(){
 
     }
 
-    /*public DateAboutContextUser(String activityU, String headphone,int humidity, float latitude, float longitude, int temperature, SimpleDateFormat time) {
+    /*public DataAboutContextUser(String activityU, String headphone,int humidity, float latitude, float longitude, int temperature, SimpleDateFormat time) {
         this.activityU = activityU;
         this.headphone = headphone;
         this.humidity = humidity;

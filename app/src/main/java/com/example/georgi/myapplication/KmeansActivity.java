@@ -8,6 +8,8 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 
 import com.google.firebase.auth.FirebaseAuth;
@@ -26,7 +28,7 @@ public class KmeansActivity extends AppCompatActivity {
     String day = format_day.format(new Date());
 
     //reference to database
-    private DatabaseReference mDatabase = FirebaseDatabase.getInstance().getReference().child("DateAboutContextUser").child(FirebaseAuth.getInstance().getCurrentUser().getUid());
+    private DatabaseReference mDatabase = FirebaseDatabase.getInstance().getReference().child("DataAboutContextUser").child(FirebaseAuth.getInstance().getCurrentUser().getUid());
     private float array_latitude[];
     private float array_longitude[];
     private float array_temperature[];
@@ -54,10 +56,16 @@ public class KmeansActivity extends AppCompatActivity {
     float centroid_humidity[][];
     float centroid_activity[][];
 
+    float latitude;
+    float longitude;
+    float temperature;
+    float humidity;
+    float activity;
+
     //number of clusters
     int noOfClusters=2;
 
-
+    Button back;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,6 +73,16 @@ public class KmeansActivity extends AppCompatActivity {
         setContentView(R.layout.activity_kmeans);
         colectData();
         history = (TextView)findViewById(R.id.tv_history);
+        back = (Button)findViewById(R.id.button_back);
+        back.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(KmeansActivity.this, ParentActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                startActivity(intent);
+            }
+        });
 
         //bottom navigation view
         BottomNavigationView bottomNavigationView = (BottomNavigationView) findViewById(R.id.bottomNavView_Bar);
@@ -184,15 +202,31 @@ public class KmeansActivity extends AppCompatActivity {
                     for (DataSnapshot result : some.getChildren()) {
                         //Log.i("copii", result.getKey().toString());
                         //Log.i("cevaaa1", String.valueOf(result.child("latitude").getValue(Double.class)));
-                        float latitude = result.child("latitude").getValue(Double.class).floatValue();
+                        if(result.child("latitude").getValue(Double.class) != null) {
+                            latitude = result.child("latitude").getValue(Double.class).floatValue();
+                        }
                         array_latitude[i] = latitude;
-                        float longitude = result.child("longitude").getValue(Double.class).floatValue();
+
+                        if(result.child("longitude").getValue(Double.class) != null){
+                            longitude = result.child("longitude").getValue(Double.class).floatValue();
+                        }
                         array_longitude[i] = longitude;
-                        float temperature = result.child("temperature (°C)").getValue(Double.class).floatValue();
+
+                        if(result.child("temperature (°C)").getValue(Double.class) != null ){
+                            temperature = result.child("temperature (°C)").getValue(Double.class).floatValue();
+                        }
+
                         array_temperature[i] = temperature;
-                        float humidity = result.child("humidity").getValue(Double.class).floatValue();
+
+                        if(result.child("humidity").getValue(Double.class) != null) {
+                            humidity = result.child("humidity").getValue(Double.class).floatValue();
+                        }
                         array_humidity[i] = humidity;
-                        float activity = result.child("activity").getValue(Double.class).floatValue();
+
+                        if(result.child("activity").getValue(Double.class) != null){
+                            activity = result.child("activity").getValue(Double.class).floatValue();
+                        }
+
                         array_activity[i] = activity;
                         //float timestamp = result.child("timestamp").getValue(Long.class).floatValue();
                         //array_timestamp[i] = timestamp;
@@ -526,10 +560,13 @@ public class KmeansActivity extends AppCompatActivity {
         return centroid;
 
     }
+
     @Override
     public void onBackPressed() {
         Intent intent=new Intent(KmeansActivity.this,ParentActivity.class);
         startActivity(intent);
         finish();
     }
+
+
 }

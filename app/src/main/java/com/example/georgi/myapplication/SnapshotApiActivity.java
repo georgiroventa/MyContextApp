@@ -6,51 +6,19 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.hardware.Sensor;
-import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
-import android.location.Location;
-import android.location.LocationListener;
 import android.location.LocationManager;
-import android.os.Build;
 import android.os.Bundle;
-import android.os.Environment;
-import android.os.PersistableBundle;
-import android.provider.Settings;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.annotation.RequiresPermission;
-import android.support.design.widget.BottomNavigationView;
-import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import com.google.android.gms.awareness.Awareness;
-import com.google.android.gms.awareness.snapshot.DetectedActivityResult;
-import com.google.android.gms.awareness.snapshot.HeadphoneStateResult;
-import com.google.android.gms.awareness.snapshot.LocationResult;
-import com.google.android.gms.awareness.snapshot.PlacesResult;
-import com.google.android.gms.awareness.snapshot.WeatherResult;
-import com.google.android.gms.awareness.state.HeadphoneState;
-import com.google.android.gms.awareness.state.Weather;
-import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.common.api.ResultCallback;
-import com.google.android.gms.location.ActivityRecognitionResult;
-import com.google.android.gms.location.DetectedActivity;
-import com.google.android.gms.location.places.PlaceLikelihood;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.ChildEventListener;
@@ -58,31 +26,18 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
 import com.squareup.picasso.Picasso;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.List;
-import java.util.Locale;
-import java.util.concurrent.TimeUnit;
-
-import androidx.work.PeriodicWorkRequest;
-import androidx.work.WorkManager;
 
 public class SnapshotApiActivity extends AppCompatActivity {
 
     //tags
     private String LOG_TAG = "Status directory";
+    private String TAG = "SnapshotApiActivity";
     private Button b5;
     private TextView tl;
     private SensorManager sensorManager;
@@ -95,13 +50,17 @@ public class SnapshotApiActivity extends AppCompatActivity {
     String time;
 
     //data about user
-    DateAboutContextUser dataUser;
+    DataAboutContextUser dataUser;
 
     private Kmeans kmeans;
 
+    Integer activityDb;
+    Integer headphoneStatusDb;
+    String timeDb;
+
     SimpleDateFormat format_day = new SimpleDateFormat("yyyy-MM-dd");
     String day = format_day.format(new Date());
-    private DatabaseReference mDatabase = FirebaseDatabase.getInstance().getReference().child("DateAboutContextUser").child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(day);
+    private DatabaseReference mDatabase = FirebaseDatabase.getInstance().getReference().child("DataAboutContextUser").child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(day);
 
 
     @Override
@@ -111,7 +70,7 @@ public class SnapshotApiActivity extends AppCompatActivity {
 
 
         //instantiate dataUser reference
-        dataUser = new DateAboutContextUser();
+        dataUser = new DataAboutContextUser();
 
 
         if (mAuth.getCurrentUser() != null) {
@@ -137,7 +96,6 @@ public class SnapshotApiActivity extends AppCompatActivity {
             //time = sa.callSnapShotGroupApis();
 
 
-            //startService();
             displayData();
 
         }
@@ -159,6 +117,8 @@ public class SnapshotApiActivity extends AppCompatActivity {
             }
 
         }
+
+
     }
 
 /*
@@ -182,7 +142,9 @@ public class SnapshotApiActivity extends AppCompatActivity {
                     //prevChildKey = "oiii";
                     //Log.i("PrevChild", prevChildKey);
                     TextView activityTv = (TextView) findViewById(R.id.probable_activity_name);
-                    Integer activityDb = dataSnapshot.child("activity").getValue(Integer.class).intValue();
+                    if(dataSnapshot.child("activity").getValue(Integer.class) != null) {
+                        activityDb = dataSnapshot.child("activity").getValue(Integer.class).intValue();
+                    }
                     String activityDb_type = "";
                     if(activityDb == 1){
                         activityDb_type = "Still";
@@ -234,13 +196,17 @@ public class SnapshotApiActivity extends AppCompatActivity {
 
                     //display the time in seconds
                     TextView timeTv = (TextView) findViewById(R.id.probable_activity_time);
-                    String timeDb = dataSnapshot.child("time").getValue().toString();
+                    if(dataSnapshot.child("time").getValue() != null) {
+                        timeDb = dataSnapshot.child("time").getValue().toString();
+                    }
                     Log.i("Time in seconds", timeDb);
                     timeTv.setText("Time & Date: " + timeDb);
 
                     //display the status
                     TextView headphoneStatusTv = (TextView)findViewById(R.id.headphone_status);
-                    Integer headphoneStatusDb = dataSnapshot.child("headphone").getValue(Integer.class).intValue();
+                    if(dataSnapshot.child("headphone").getValue(Integer.class) != null) {
+                        headphoneStatusDb = dataSnapshot.child("headphone").getValue(Integer.class).intValue();
+                    }
                     if(headphoneStatusDb == 1){
                         headphoneStatusTv.setText("Plugged in");
                     }
@@ -287,14 +253,6 @@ public class SnapshotApiActivity extends AppCompatActivity {
 
 
 
-    public void startService() {
-
-        Intent serviceIntent = new Intent(this, ForegroundService.class);
-        serviceIntent.putExtra("inputExtra", "Application still running");
-
-        ContextCompat.startForegroundService(this, serviceIntent);
-    }
-
     public void stopService(View v) {
         Intent serviceIntent = new Intent(this, ForegroundService.class);
         stopService(serviceIntent);
@@ -327,6 +285,8 @@ public class SnapshotApiActivity extends AppCompatActivity {
         final AlertDialog alert = builder.create();
         alert.show();
     }
+
+
 
     @Override
     public void onBackPressed() {

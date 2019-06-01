@@ -32,7 +32,9 @@ public class ForegroundService extends Service {
                 .setContentTitle("Foreground Service")
                 .setContentText(input)
                 .setContentIntent(pendingIntent)
+                .setVibrate(null)
                 .build();
+
 
         startForeground(1, notification);
 
@@ -58,6 +60,7 @@ public class ForegroundService extends Service {
                     "Foreground Service Channel",
                     NotificationManager.IMPORTANCE_DEFAULT
             );
+            serviceChannel.enableVibration(false);
 
             NotificationManager manager = getSystemService(NotificationManager.class);
             manager.createNotificationChannel(serviceChannel);

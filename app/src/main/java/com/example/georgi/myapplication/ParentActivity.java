@@ -38,7 +38,6 @@ public class ParentActivity extends AppCompatActivity
     private DatabaseReference mDatabase;
     private static final int GET_PERMISSION_REQUEST_CODE = 1;
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -46,7 +45,7 @@ public class ParentActivity extends AppCompatActivity
 
         mAuth = FirebaseAuth.getInstance();
         database = FirebaseDatabase.getInstance();
-        mDatabase = database.getReference().child("DateAboutContextUser");
+        mDatabase = database.getReference().child("DataAboutContextUser");
 
         getPermission();
 
@@ -143,8 +142,12 @@ public class ParentActivity extends AppCompatActivity
                 }
             });
 
+            //start foreground service
+            startService();
+
             //call jobService
             scheduleJob();
+
         }
 
     }
@@ -155,25 +158,6 @@ public class ParentActivity extends AppCompatActivity
         FirebaseUser currentUser = mAuth.getCurrentUser();
     }
 
-    //jobScheduler
-    public void scheduleJob() {
-        ComponentName componentName = new ComponentName(this, ColectJobService.class);
-
-        JobInfo info = new JobInfo.Builder(123, componentName)
-                //.setRequiresCharging(true)
-                // .setExtras(bundle)
-                .setPersisted(true)
-                .setPeriodic(15 * 60 * 1000)
-                .build();
-
-        JobScheduler scheduler = (JobScheduler) getSystemService(JOB_SCHEDULER_SERVICE);
-        int resultCode = scheduler.schedule(info);
-        if (resultCode == JobScheduler.RESULT_SUCCESS) {
-            Log.d(TAG, "Job scheduled");
-        } else {
-            Log.d(TAG, "Job scheduling failed");
-        }
-    }
 
 
 
@@ -202,6 +186,33 @@ public class ParentActivity extends AppCompatActivity
         // Toast.makeText(SnapshotApiActivity.this, "Permission was not granted.", Toast.LENGTH_LONG).show();
         //}
 
+    }
+    public void startService() {
+
+        Intent serviceIntent = new Intent(this, ForegroundService.class);
+        serviceIntent.putExtra("inputExtra", "Application still running");
+
+        ContextCompat.startForegroundService(this, serviceIntent);
+    }
+
+    //jobScheduler
+    public void scheduleJob() {
+        ComponentName componentName = new ComponentName(this, ColectJobService.class);
+
+        JobInfo info = new JobInfo.Builder(123, componentName)
+                //.setRequiresCharging(true)
+                // .setExtras(bundle)
+                .setPersisted(true)
+                .setPeriodic(15 * 60 * 1000)
+                .build();
+
+        JobScheduler scheduler = (JobScheduler) getSystemService(JOB_SCHEDULER_SERVICE);
+        int resultCode = scheduler.schedule(info);
+        if (resultCode == JobScheduler.RESULT_SUCCESS) {
+            Log.d(TAG, "Job scheduled");
+        } else {
+            Log.d(TAG, "Job scheduling failed");
+        }
     }
 
 

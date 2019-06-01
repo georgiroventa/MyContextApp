@@ -42,15 +42,6 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
         findViewById(R.id.button_register).setOnClickListener(this);
         findViewById(R.id.button_login).setOnClickListener(this);
 
-       /* final TextView buttonU1 = (TextView) findViewById(R.id.button_login);
-        buttonU1.setOnClickListener(new View.OnClickListener()
-        {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(RegisterActivity.this, MainActivity.class);
-                startActivity(intent);
-            }
-        });*/
     }
     @Override
     public void onStart() {

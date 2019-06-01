@@ -75,6 +75,7 @@ public class MainActivity extends Activity implements OnClickListener {
             startActivity(intent);
         }
 
+
     }
     @Override
     public void onStart() {
@@ -159,8 +160,6 @@ public class MainActivity extends Activity implements OnClickListener {
         //}
 
     }
-
-
 
 
     @Override

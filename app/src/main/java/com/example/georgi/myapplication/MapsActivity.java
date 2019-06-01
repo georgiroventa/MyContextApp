@@ -16,6 +16,7 @@ import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
@@ -71,6 +72,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private LocationListener listener;
     double latitude;
     double longitude;
+
+    private final int REQ_PERMISSION = 5;
 
     @SuppressLint("MissingPermission")
     @Override
@@ -238,8 +241,50 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
         mMap.setMyLocationEnabled(true);
         mMap1.setMyLocationEnabled(true);
+       /*
+        if (checkPermission())
+            mMap.setMyLocationEnabled(true);
+        else
+            askPermission();
+        */
+    }
+    /*
+    // Check for permission to access Location
+    private boolean checkPermission() {
+        // Ask for permission if it wasn't granted yet
+        return (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+                == PackageManager.PERMISSION_GRANTED);
     }
 
+    // Asks for permission
+    private void askPermission() {
+        ActivityCompat.requestPermissions(
+                this,
+                new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                REQ_PERMISSION
+        );
+    }
+
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        switch (requestCode) {
+            case REQ_PERMISSION: {
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    // Permission granted
+                    if (checkPermission())
+                        mMap.setMyLocationEnabled(true);
+
+                } else {
+                    // Permission denied
+
+                }
+                break;
+            }
+        }
+    }
+*/
     @Override
     public void onDirectionFinderStart() {
         progressDialog = ProgressDialog.show(this, "Please wait.",
