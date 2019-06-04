@@ -56,7 +56,7 @@
             android:value="AIzaSyBLsZ1y8exxrnbEV4a0pzlVa4qeuzPU39Q" />
 
         <activity
-            android:name=".MapsActivity"
+            android:name=".MapActivity"
             android:label="@string/title_activity_maps"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity android:name=".SnapshotApiActivity" />

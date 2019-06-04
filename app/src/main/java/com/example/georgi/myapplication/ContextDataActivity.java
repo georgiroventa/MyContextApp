@@ -70,7 +70,7 @@ public class ContextDataActivity extends AppCompatActivity {
 
                     //display user's activity
                     if(dataSnapshot.child("activity").getValue(Integer.class) != null) {
-                        Integer activityDb = dataSnapshot.child("activity").getValue(Integer.class).intValue();
+                        activityDb = dataSnapshot.child("activity").getValue(Integer.class).intValue();
                     }
                     String activityDb_type = "";
                     if(activityDb == 1){
@@ -104,15 +104,82 @@ public class ContextDataActivity extends AppCompatActivity {
 
                     //display time in seconds
                     Long time_secDb = dataSnapshot.child("timestamp").getValue(Long.class);
-                    time_sec_tv.setText("Time in seconds: " + time_secDb);
+                    time_sec_tv.setText("Time in seconds: " + time_secDb + " seconds");
 
                     //display date format
                     Long timeFormatDb = dataSnapshot.child("time").getValue(Long.class);
-                    date_format_tv.setText("Date(dayOfWeek_dayOfMonth_month): " + timeFormatDb);
+                    String day_week_string = "null";
+                    String month_string = "null";
+                    int day_week = (int) (timeFormatDb/10000);
+                    int day = (int) ((timeFormatDb%10000)/100);
+                    int month = (int) (timeFormatDb%100);
+                    if(month < 10){
+                        month = month % 10;
+                    }
+                    if(day_week == 1){
+                        day_week_string = "Sunday, ";
+                    }
+                    if(day_week == 2){
+                        day_week_string = "Monday, ";
+                    }
+                    if(day_week == 3){
+                        day_week_string = "Tuesday, ";
+                    }
+                    if(day_week == 4){
+                        day_week_string = "Wednesday, ";
+                    }
+                    if(day_week == 5){
+                        day_week_string = "Thursday, ";
+                    }
+                    if(day_week == 6){
+                        day_week_string = "Friday, ";
+                    }
+                    if(day_week == 7){
+                        day_week_string = "Saturday, ";
+                    }
+                    if(month == 1){
+                        month_string = " January";
+                    }
+                    if(month == 2){
+                        month_string = " February";
+                    }
+                    if(month == 3){
+                        month_string = " March";
+                    }
+                    if(month == 4){
+                        month_string = " April";
+                    }
+                    if(month == 5){
+                        month_string = " May";
+                    }
+                    if(month == 6){
+                        month_string = " June";
+                    }
+                    if(month == 7){
+                        month_string = " July";
+                    }
+                    if(month == 8){
+                        month_string = " August";
+                    }
+                    if(month == 9){
+                        month_string = " September";
+                    }
+                    if(month == 10){
+                        month_string = " Octomber";
+                    }
+                    if(month == 11){
+                        month_string = " November";
+                    }
+                    if(month == 12) {
+                        month_string = " December";
+                    }
+
+
+                    date_format_tv.setText("Date: " + day_week_string + String.valueOf(day) + month_string);
 
                     //display time slot
                     Double timeSlotDb = dataSnapshot.child("timeslot").getValue(Double.class);
-                    time_slot_tv.setText("Time slot: " + timeSlotDb);
+                    time_slot_tv.setText("Time slot(Half an hour intervals): " + timeSlotDb);
 
                     //display status phone
                     if(dataSnapshot.child("headphone").getValue(Integer.class) != null){

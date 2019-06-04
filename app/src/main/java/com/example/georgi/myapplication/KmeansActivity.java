@@ -8,8 +8,6 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.Button;
 import android.widget.TextView;
 
 import com.google.firebase.auth.FirebaseAuth;
@@ -41,7 +39,7 @@ public class KmeansActivity extends AppCompatActivity {
     private float matrix_temperture[][];
     private float matrix_humidity[][];
     private float matrix_activity[][];
-    public  static float clusters[][] = new float[2][5];
+    public static float clusters[][] = new float[2][5];
 
     //the history of clusters
     private String history_clusters = "";
@@ -65,24 +63,13 @@ public class KmeansActivity extends AppCompatActivity {
     //number of clusters
     int noOfClusters=2;
 
-    Button back;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_kmeans);
         colectData();
         history = (TextView)findViewById(R.id.tv_history);
-        back = (Button)findViewById(R.id.button_back);
-        back.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(KmeansActivity.this, ParentActivity.class);
-                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                startActivity(intent);
-            }
-        });
+
 
         //bottom navigation view
         BottomNavigationView bottomNavigationView = (BottomNavigationView) findViewById(R.id.bottomNavView_Bar);
@@ -100,7 +87,7 @@ public class KmeansActivity extends AppCompatActivity {
                         startActivity(intent0);
                         break;
                     case R.id.nav_map:
-                        Intent intent1 = new Intent(KmeansActivity.this, MapsActivity.class);
+                        Intent intent1 = new Intent(KmeansActivity.this, MapActivity.class);
                         startActivity(intent1);
                         break;
                     case R.id.nav_noise:
@@ -446,6 +433,17 @@ public class KmeansActivity extends AppCompatActivity {
             }
             history.setText(history_clusters);
             flag = 0;
+
+            //send the clusters to MapActivity
+           // for(int i = 0; i < noOfClusters; i++) {
+              //  Intent cluster1 = new Intent(this, MapActivity.class);
+               // cluster1.putExtra("cluster1", clusters[0]);
+                //startActivity(cluster1);
+
+          // Intent cluster2 = new Intent(KmeansActivity.this, MapActivity.class);
+            //cluster2.putExtra("cluster2", clusters[1]);
+            //startActivity(cluster2);
+           // }
         }
 
     }

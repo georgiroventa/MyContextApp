@@ -13,18 +13,11 @@ import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
-
-import com.google.android.gms.awareness.Awareness;
-import com.google.android.gms.awareness.snapshot.LocationResult;
-import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.common.api.ResultCallback;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -76,7 +69,7 @@ public class RequestActivity extends AppCompatActivity {
                         startActivity(intent0);
                         break;
                     case R.id.nav_map:
-                        Intent intent1 = new Intent(RequestActivity.this, MapsActivity.class);
+                        Intent intent1 = new Intent(RequestActivity.this, MapActivity.class);
                         startActivity(intent1);
                         break;
                     case R.id.nav_noise:

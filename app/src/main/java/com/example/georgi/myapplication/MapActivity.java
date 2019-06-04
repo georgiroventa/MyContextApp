@@ -14,20 +14,13 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
-import android.support.v4.content.ContextCompat;
-import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.awareness.Awareness;
@@ -49,13 +42,12 @@ import com.google.android.gms.maps.model.PolylineOptions;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import com.example.georgi.myapplication.Modules.DirectionFinder;
 import com.example.georgi.myapplication.Modules.DirectionFinderListener;
 import com.example.georgi.myapplication.Modules.Route;
 
-public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback, DirectionFinderListener, GoogleApiClient.ConnectionCallbacks {
+public class MapActivity extends AppCompatActivity implements OnMapReadyCallback, DirectionFinderListener, GoogleApiClient.ConnectionCallbacks {
 
     private GoogleMap mMap, mMap1;
     private Button btnFindPath;
@@ -74,6 +66,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     double longitude;
 
     private final int REQ_PERMISSION = 5;
+    private GoogleMap mMap2;
 
     @SuppressLint("MissingPermission")
     @Override
@@ -98,6 +91,20 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         });
         */
 
+//        Bundle extras = getIntent().getExtras();
+//        float[] cluster1 = extras.getFloatArray("cluster1");
+//
+//        for(int i = 0; i < cluster1.length; i++){
+//            System.out.println(cluster1[i] + "");
+//        }
+
+        for(int i = 0; i < 2; i++){
+            for(int j = 0; j < KmeansActivity.clusters[i].length; j++) {
+                System.out.println(KmeansActivity.clusters[i][j]);
+            }
+            System.out.println();
+        }
+
         BottomNavigationView bottomNavigationView = (BottomNavigationView) findViewById(R.id.bottomNavView_Bar);
         Menu menu = bottomNavigationView.getMenu();
         MenuItem menuItem = menu.getItem(0);
@@ -109,26 +116,26 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 switch (item.getItemId()){
 
                     case R.id.nav_home:
-                        Intent intent0 = new Intent(MapsActivity.this, ParentActivity.class);
+                        Intent intent0 = new Intent(MapActivity.this, ParentActivity.class);
                         startActivity(intent0);
                         break;
                     case R.id.nav_map:
-                        Intent intent1 = new Intent(MapsActivity.this, MapsActivity.class);
+                        Intent intent1 = new Intent(MapActivity.this, MapActivity.class);
                         startActivity(intent1);
                         break;
                     case R.id.nav_noise:
-                        Intent intent2 = new Intent(MapsActivity.this, NoiseLevelActivity.class);
+                        Intent intent2 = new Intent(MapActivity.this, NoiseLevelActivity.class);
                         startActivity(intent2);
                         break;
                     case R.id.nav_coordinates:
-                        Intent intent3 = new Intent(MapsActivity.this, RequestActivity.class);
+                        Intent intent3 = new Intent(MapActivity.this, RequestActivity.class);
                         startActivity(intent3);
                         break;
 
 
 
                     case R.id.nav_notification:
-                        Intent intent4 = new Intent(MapsActivity.this, NotificationsActivity.class);
+                        Intent intent4 = new Intent(MapActivity.this, NotificationsActivity.class);
                         startActivity(intent4);
                         break;
 
@@ -219,14 +226,20 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
         mMap1 = googleMap;
+        mMap2 = googleMap;
         LatLng hcmus = new LatLng(/*45.7497836*/ latitude, /*21.2428627 */ longitude);
-        LatLng hcmus1 = new LatLng(45.752330780,21.2235641479);
+        LatLng hcmus1 = new LatLng(KmeansActivity.clusters[0][0],KmeansActivity.clusters[0][1]);
+        LatLng hcmus2 = new LatLng(KmeansActivity.clusters[1][0],KmeansActivity.clusters[1][1]);
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(hcmus, 18));
         mMap1.moveCamera(CameraUpdateFactory.newLatLngZoom(hcmus1, 18));
+        mMap2.moveCamera(CameraUpdateFactory.newLatLngZoom(hcmus2, 18));
         originMarkers.add(mMap.addMarker(new MarkerOptions()
                 .position(hcmus)));
         originMarkers.add(mMap1.addMarker(new MarkerOptions()
                 .position(hcmus1)));
+        originMarkers.add(mMap2.addMarker(new MarkerOptions()
+                .position(hcmus2)));
+
 
 
         if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -241,6 +254,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
         mMap.setMyLocationEnabled(true);
         mMap1.setMyLocationEnabled(true);
+        mMap2.setMyLocationEnabled(true);
        /*
         if (checkPermission())
             mMap.setMyLocationEnabled(true);
@@ -344,7 +358,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
     @Override
     public void onBackPressed() {
-        Intent intent=new Intent(MapsActivity.this,ParentActivity.class);
+        Intent intent=new Intent(MapActivity.this,ParentActivity.class);
         startActivity(intent);
         finish();
     }
