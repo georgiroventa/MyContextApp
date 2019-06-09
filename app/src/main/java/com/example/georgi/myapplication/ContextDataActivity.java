@@ -2,10 +2,12 @@ package com.example.georgi.myapplication;
 
 import android.content.Intent;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
+import android.support.design.widget.BottomNavigationView;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -16,8 +18,6 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.Query;
-import com.google.firebase.database.ValueEventListener;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -26,7 +26,6 @@ public class ContextDataActivity extends AppCompatActivity {
 
     private TextView date_time_tv, activity_tv, time_sec_tv, date_format_tv;
     private TextView weather_tv, location_tv, headphone_tv, time_slot_tv;
-    private Button button;
     Integer activityDb = 0;
     Integer headphoneStatusDb = 0;
 
@@ -34,6 +33,8 @@ public class ContextDataActivity extends AppCompatActivity {
     String day = format_day.format(new Date());
     private DatabaseReference mDatabase = FirebaseDatabase.getInstance().getReference().child("DataAboutContextUser").child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(day);
 
+    Long time_secDb;
+    Long timeFormatDb;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,13 +49,47 @@ public class ContextDataActivity extends AppCompatActivity {
         headphone_tv = (TextView)findViewById(R.id.headphone_tv);
         weather_tv = (TextView)findViewById(R.id.weather_tv);
         location_tv = (TextView)findViewById(R.id.location_tv);
-        button = (Button)findViewById(R.id.button);
-        button.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                displayDataContext();
+        displayDataContext();
+
+        /*start bottom menu*/
+        BottomNavigationView bottomNavigationView = (BottomNavigationView) findViewById(R.id.bottomNavView_Bar);
+        Menu menu = bottomNavigationView.getMenu();
+        MenuItem menuItem = menu.getItem(0);
+        menuItem.setChecked(true);
+
+        bottomNavigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
+            @Override
+            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+                switch (item.getItemId()){
+
+                    case R.id.nav_home:
+                        Intent intent0 = new Intent(ContextDataActivity.this, MainActivity.class);
+                        startActivity(intent0);
+                        break;
+                    case R.id.nav_map:
+                        Intent intent1 = new Intent(ContextDataActivity.this, MapActivity.class);
+                        startActivity(intent1);
+                        break;
+                    case R.id.nav_noise:
+                        Intent intent2 = new Intent(ContextDataActivity.this, NoiseLevelActivity.class);
+                        startActivity(intent2);
+                        break;
+                    case R.id.nav_coordinates:
+                        Intent intent3 = new Intent(ContextDataActivity.this, RequestActivity.class);
+                        startActivity(intent3);
+                        break;
+                    case R.id.nav_notification:
+                        Intent intent4 = new Intent(ContextDataActivity.this, KmeansActivity.class);
+                        startActivity(intent4);
+                        break;
+
+                }
+
+                return false;
             }
         });
-        displayDataContext();
+
+        /* end bottom menu */
 
     }
 
@@ -103,11 +138,16 @@ public class ContextDataActivity extends AppCompatActivity {
                     activity_tv.setText("User's activity: " + activityDb_type);
 
                     //display time in seconds
-                    Long time_secDb = dataSnapshot.child("timestamp").getValue(Long.class);
+                    if(dataSnapshot.child("timestamp").getValue(Long.class) != null){
+                        time_secDb = dataSnapshot.child("timestamp").getValue(Long.class);
+                    }
+
                     time_sec_tv.setText("Time in seconds: " + time_secDb + " seconds");
 
                     //display date format
-                    Long timeFormatDb = dataSnapshot.child("time").getValue(Long.class);
+                    if(dataSnapshot.child("time").getValue(Long.class) != null ){
+                        timeFormatDb = dataSnapshot.child("time").getValue(Long.class);
+                    }
                     String day_week_string = "null";
                     String month_string = "null";
                     int day_week = (int) (timeFormatDb/10000);
@@ -207,9 +247,6 @@ public class ContextDataActivity extends AppCompatActivity {
                     weather_tv.setText("Current weather\n" + weatherDb);
 
 
-                 //   Log.i("User activity", dataSnapshot.child("activity").getValue().toString());
-                 //   Log.i("Time in seconds", dataSnapshot.child("time").getValue().toString());
-
             }
 
             @Override
@@ -228,7 +265,7 @@ public class ContextDataActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        Intent intent=new Intent(ContextDataActivity.this,ParentActivity.class);
+        Intent intent=new Intent(ContextDataActivity.this,MainActivity.class);
         startActivity(intent);
         finish();
     }

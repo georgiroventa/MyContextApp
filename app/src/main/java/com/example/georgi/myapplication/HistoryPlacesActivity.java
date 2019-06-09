@@ -3,11 +3,11 @@ package com.example.georgi.myapplication;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
-public class NotificationsActivity extends AppCompatActivity {
+public class HistoryPlacesActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_notifications);
+        setContentView(R.layout.activity_history_places);
     }
 }

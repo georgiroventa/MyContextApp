@@ -2,10 +2,11 @@ package com.example.georgi.myapplication;
 
 import android.*;
 import android.annotation.SuppressLint;
-import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.location.Address;
+import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -19,46 +20,49 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.Button;
-import android.widget.EditText;
+import android.view.View;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.awareness.Awareness;
-import com.google.android.gms.awareness.snapshot.WeatherResult;
-import com.google.android.gms.awareness.state.Weather;
 import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.common.api.ResultCallback;
+import com.google.android.gms.location.Geofence;
+import com.google.android.gms.location.GeofencingRequest;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.Circle;
+import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.gms.maps.model.Polyline;
-import com.google.android.gms.maps.model.PolylineOptions;
 
-import java.io.UnsupportedEncodingException;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 
-import com.example.georgi.myapplication.Modules.DirectionFinder;
-import com.example.georgi.myapplication.Modules.DirectionFinderListener;
-import com.example.georgi.myapplication.Modules.Route;
+public class MapActivity extends AppCompatActivity implements OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks, GoogleMap.OnInfoWindowClickListener {
 
-public class MapActivity extends AppCompatActivity implements OnMapReadyCallback, DirectionFinderListener, GoogleApiClient.ConnectionCallbacks {
-
-    private GoogleMap mMap, mMap1;
-    private Button btnFindPath;
-    private EditText etOrigin;
-    private EditText etDestination;
+    private GoogleMap mMap, mMap1, mMap2;
     private List<Marker> originMarkers = new ArrayList<>();
-    private List<Marker> destinationMarkers = new ArrayList<>();
-    private List<Polyline> polylinePaths = new ArrayList<>();
-    private ProgressDialog progressDialog;
     private GoogleApiClient mClient;
-
+    private Circle circle1, circle2;
+    private String window1;
+    private String window2;
+    private String location1;
+    private String location2;
+    private String activity1;
+    private String activity2;
+    private String temperature1 = "" + KmeansActivity.clusters[0][2];
+    private String temperature2 = "" + KmeansActivity.clusters[1][2];
+    private String humidity1 = "" + KmeansActivity.clusters[0][3];
+    private String humidity2 = "" + KmeansActivity.clusters[1][3];
+    private String lat_lng1 = "Latitude: " + KmeansActivity.clusters[0][0] + " and " + "longitude: " + KmeansActivity.clusters[0][1];
+    private String lat_lng2 = "Latitude: " + KmeansActivity.clusters[1][0] + " and " + "longitude: " + KmeansActivity.clusters[1][1];
+    private Object obj = new Object();
     //get current location
     private LocationManager locationManager;
     private LocationListener listener;
@@ -66,7 +70,11 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
     double longitude;
 
     private final int REQ_PERMISSION = 5;
-    private GoogleMap mMap2;
+
+    HashMap<String, MarkerHolder> markerHolderMap1 = new HashMap<String, MarkerHolder>();
+    HashMap<String, MarkerHolder> markerHolderMap2 = new HashMap<String, MarkerHolder>();
+    Marker marker1;
+    Marker marker2;
 
     @SuppressLint("MissingPermission")
     @Override
@@ -78,25 +86,6 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
-        //btnFindPath = (Button) findViewById(R.id.btnFindPath);
-        //etOrigin = (EditText) findViewById(R.id.etOrigin);
-        //etDestination = (EditText) findViewById(R.id.etDestination);
-
-        /*
-        btnFindPath.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                sendRequest();
-            }
-        });
-        */
-
-//        Bundle extras = getIntent().getExtras();
-//        float[] cluster1 = extras.getFloatArray("cluster1");
-//
-//        for(int i = 0; i < cluster1.length; i++){
-//            System.out.println(cluster1[i] + "");
-//        }
 
         for(int i = 0; i < 2; i++){
             for(int j = 0; j < KmeansActivity.clusters[i].length; j++) {
@@ -105,6 +94,13 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
             System.out.println();
         }
 
+        location1 = getAddress(KmeansActivity.clusters[0][0], KmeansActivity.clusters[0][1]);
+        location2 = getAddress(KmeansActivity.clusters[1][0], KmeansActivity.clusters[1][1]);
+        activity1 = determineActivity(KmeansActivity.clusters[0][4]);
+        activity2 = determineActivity(KmeansActivity.clusters[1][4]);
+        window1 = "Type of activity: " + activity1 + "\nTemperature: " + (int)KmeansActivity.clusters[0][2] + "(°C)" + " and " + (int)KmeansActivity.clusters[0][3] + "% humidity";
+        window2 = "Type of activity: " + activity2 + "\nTemperature: " + (int)KmeansActivity.clusters[1][2] + "(°C)" + " and " + (int)KmeansActivity.clusters[1][3] + "% humidity";
+        /*start bottom menu*/
         BottomNavigationView bottomNavigationView = (BottomNavigationView) findViewById(R.id.bottomNavView_Bar);
         Menu menu = bottomNavigationView.getMenu();
         MenuItem menuItem = menu.getItem(0);
@@ -116,7 +112,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                 switch (item.getItemId()){
 
                     case R.id.nav_home:
-                        Intent intent0 = new Intent(MapActivity.this, ParentActivity.class);
+                        Intent intent0 = new Intent(MapActivity.this, MainActivity.class);
                         startActivity(intent0);
                         break;
                     case R.id.nav_map:
@@ -135,19 +131,20 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
 
 
                     case R.id.nav_notification:
-                        Intent intent4 = new Intent(MapActivity.this, NotificationsActivity.class);
+                        Intent intent4 = new Intent(MapActivity.this, KmeansActivity.class);
                         startActivity(intent4);
                         break;
 
                 }
 
-
                 return false;
             }
         });
 
-        //awareness some try
+        /* end bottom menu */
 
+
+        //awareness some try
         mClient = new GoogleApiClient.Builder(this)
                 .addApi(Awareness.API)
                 .addConnectionCallbacks(this)
@@ -193,25 +190,6 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         }
         locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 5000, 0, listener);
     }
-    private void sendRequest() {
-        String origin = etOrigin.getText().toString();
-        String destination = etDestination.getText().toString();
-        if (origin.isEmpty()) {
-            Toast.makeText(this, "Please enter origin address!", Toast.LENGTH_SHORT).show();
-            return;
-        }
-        if (destination.isEmpty()) {
-            Toast.makeText(this, "Please enter destination address!", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        try {
-            new DirectionFinder(this, origin, destination).execute();
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
-    }
-
 
     /**
      * Manipulates the map once available.
@@ -230,15 +208,115 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         LatLng hcmus = new LatLng(/*45.7497836*/ latitude, /*21.2428627 */ longitude);
         LatLng hcmus1 = new LatLng(KmeansActivity.clusters[0][0],KmeansActivity.clusters[0][1]);
         LatLng hcmus2 = new LatLng(KmeansActivity.clusters[1][0],KmeansActivity.clusters[1][1]);
+        circle1 = mMap1.addCircle(new CircleOptions()
+                    .center(hcmus1)
+                    .radius(100)
+                    .strokeWidth(5)
+                    .strokeColor(Color.GREEN)
+                    .fillColor(Color.rgb(153, 195, 216))
+                    .clickable(true));
+       // circle1.setTag(new DataAboutContextUser("merege", 90, 45.56f, 21.57f, 27, 3456));
+        circle2 = mMap2.addCircle(new CircleOptions()
+                    .center(hcmus2)
+                    .radius(100)
+                    .strokeWidth(5)
+                    .strokeColor(Color.GREEN)
+                    .fillColor(Color.rgb(226, 181, 181))
+                    .clickable(true));
+
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(hcmus, 18));
         mMap1.moveCamera(CameraUpdateFactory.newLatLngZoom(hcmus1, 18));
         mMap2.moveCamera(CameraUpdateFactory.newLatLngZoom(hcmus2, 18));
         originMarkers.add(mMap.addMarker(new MarkerOptions()
                 .position(hcmus)));
-        originMarkers.add(mMap1.addMarker(new MarkerOptions()
-                .position(hcmus1)));
-        originMarkers.add(mMap2.addMarker(new MarkerOptions()
-                .position(hcmus2)));
+        marker1 = mMap1.addMarker(new MarkerOptions()
+                .position(hcmus1)
+                .title(location1)
+                .snippet(window1));
+        marker2 = mMap2.addMarker(new MarkerOptions()
+                .position(hcmus2)
+                .title(location2)
+                .snippet(window2));
+        MarkerHolder mholder1 = new MarkerHolder(activity1, temperature1, humidity1, lat_lng1 );
+        markerHolderMap1.put(marker1.getId(), mholder1);
+
+        mMap1.setInfoWindowAdapter(new GoogleMap.InfoWindowAdapter() {
+            @Override
+            public View getInfoWindow(Marker arg0) {
+                return null;
+            }
+
+            @Override
+            public View getInfoContents(Marker arg0) {
+
+                View v = getLayoutInflater().inflate(R.layout.customlayout1, null);
+
+                TextView tLocation = (TextView) v.findViewById(R.id.paq1);
+
+                TextView tSnippet = (TextView) v.findViewById(R.id.names1);
+
+                TextView tDates = (TextView) v.findViewById(R.id.dates1);
+
+                TextView tPlaces = (TextView) v.findViewById(R.id.places1);
+
+                //These are standard, just uses the Title and Snippet
+                tLocation.setText(arg0.getTitle());
+
+                tSnippet.setText(arg0.getSnippet());
+
+                //Now get the extra info you need from the HashMap
+                //Store it in a MarkerHolder Object
+                MarkerHolder mHolder = markerHolderMap1.get(arg0.getId()); //use the ID to get the info
+
+                tDates.setText("" + mHolder.latitude_longitude_marker );
+
+                //tPlaces.setText(mHolder.latitude_longitude_marker + " " + mHolder.activity_marker);
+
+                return v;
+            }
+        });
+
+        mMap1.setOnInfoWindowClickListener(this);
+
+
+        MarkerHolder mholder2 = new MarkerHolder(activity2, temperature2, humidity2, lat_lng2 );
+        markerHolderMap2.put(marker2.getId(), mholder2);
+
+        mMap2.setInfoWindowAdapter(new GoogleMap.InfoWindowAdapter() {
+            @Override
+            public View getInfoWindow(Marker arg0) {
+                return null;
+            }
+
+            @Override
+            public View getInfoContents(Marker arg0) {
+
+                View v = getLayoutInflater().inflate(R.layout.customlayout2, null);
+
+                TextView tLocation = (TextView) v.findViewById(R.id.paq2);
+
+                TextView tSnippet = (TextView) v.findViewById(R.id.names2);
+
+                TextView tDates = (TextView) v.findViewById(R.id.dates2);
+
+                TextView tPlaces = (TextView) v.findViewById(R.id.places2);
+
+                //These are standard, just uses the Title and Snippet
+                tLocation.setText(arg0.getTitle());
+
+                tSnippet.setText(arg0.getSnippet());
+
+                //Now get the extra info you need from the HashMap
+                //Store it in a MarkerHolder Object
+                MarkerHolder mHolder = markerHolderMap2.get(arg0.getId()); //use the ID to get the info
+
+                tDates.setText(mHolder.latitude_longitude_marker);
+
+                //tPlaces.setText(mHolder.latitude_longitude_marker + " " + mHolder.activity_marker);
+
+                return v;
+            }
+        });
 
 
 
@@ -255,110 +333,31 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         mMap.setMyLocationEnabled(true);
         mMap1.setMyLocationEnabled(true);
         mMap2.setMyLocationEnabled(true);
-       /*
-        if (checkPermission())
-            mMap.setMyLocationEnabled(true);
-        else
-            askPermission();
-        */
     }
-    /*
-    // Check for permission to access Location
-    private boolean checkPermission() {
-        // Ask for permission if it wasn't granted yet
-        return (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
-                == PackageManager.PERMISSION_GRANTED);
+    //create geofence
+    @NonNull
+    private Geofence getGeofence() {
+
+        return new Geofence.Builder()
+                .setRequestId("geofence cluster 1")
+                .setExpirationDuration(Geofence.NEVER_EXPIRE)
+                .setCircularRegion(KmeansActivity.clusters[0][0],KmeansActivity.clusters[0][1], 200)
+                .setNotificationResponsiveness(1000)
+                .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER | Geofence.GEOFENCE_TRANSITION_EXIT)
+                .build();
     }
 
-    // Asks for permission
-    private void askPermission() {
-        ActivityCompat.requestPermissions(
-                this,
-                new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
-                REQ_PERMISSION
-        );
+    private GeofencingRequest getGeofencingRequest() {
+        GeofencingRequest.Builder builder = new GeofencingRequest.Builder();
+        builder.setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_ENTER);
+        builder.addGeofences((List<Geofence>) getGeofence());
+        return builder.build();
     }
 
 
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        switch (requestCode) {
-            case REQ_PERMISSION: {
-                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    // Permission granted
-                    if (checkPermission())
-                        mMap.setMyLocationEnabled(true);
-
-                } else {
-                    // Permission denied
-
-                }
-                break;
-            }
-        }
-    }
-*/
-    @Override
-    public void onDirectionFinderStart() {
-        progressDialog = ProgressDialog.show(this, "Please wait.",
-                "Finding direction..!", true);
-
-        if (originMarkers != null) {
-            for (Marker marker : originMarkers) {
-                marker.remove();
-            }
-        }
-
-        if (destinationMarkers != null) {
-            for (Marker marker : destinationMarkers) {
-                marker.remove();
-            }
-        }
-
-        if (polylinePaths != null) {
-            for (Polyline polyline:polylinePaths ) {
-                polyline.remove();
-            }
-        }
-    }
-
-    @Override
-    public void onDirectionFinderSuccess(List<Route> routes) {
-        progressDialog.dismiss();
-        polylinePaths = new ArrayList<>();
-        originMarkers = new ArrayList<>();
-        destinationMarkers = new ArrayList<>();
-
-        for (Route route : routes) {
-            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(route.startLocation, 16));
-            //((TextView) findViewById(R.id.tvDuration)).setText(route.duration.text);
-            //((TextView) findViewById(R.id.tvDistance)).setText(route.distance.text);
-
-            originMarkers.add(mMap.addMarker(new MarkerOptions()
-                    .icon(BitmapDescriptorFactory.fromResource(R.drawable.start_blue))
-                    .title(route.startAddress)
-                    .position(route.startLocation)));
-            destinationMarkers.add(mMap.addMarker(new MarkerOptions()
-                    .icon(BitmapDescriptorFactory.fromResource(R.drawable.end_green))
-                    .title(route.endAddress)
-                    .position(route.endLocation)));
-
-            PolylineOptions polylineOptions = new PolylineOptions().
-                    geodesic(true).
-                    color(Color.BLUE).
-                    width(10);
-
-            for (int i = 0; i < route.points.size(); i++)
-                polylineOptions.add(route.points.get(i));
-
-            polylinePaths.add(mMap.addPolyline(polylineOptions));
-        }
-
-    }
     @Override
     public void onBackPressed() {
-        Intent intent=new Intent(MapActivity.this,ParentActivity.class);
+        Intent intent=new Intent(MapActivity.this,MainActivity.class);
         startActivity(intent);
         finish();
     }
@@ -367,28 +366,62 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
     public void onConnected(@Nullable Bundle bundle) {
         Log.i("Some", "OnConnected");
 
-        Awareness.SnapshotApi.getWeather(mClient)
-                .setResultCallback(new ResultCallback<WeatherResult>() {
-                    @Override
-                    public void onResult(@NonNull WeatherResult weatherResult) {
-                        if(!weatherResult.getStatus().isSuccess()){
-                                Log.i("Some", "error");
-                                return;
-                        }
-
-                        Weather weather = weatherResult.getWeather();
-                        float temp = weather.getTemperature(Weather.CELSIUS);
-                        Log.i("Some", "Temp: " + temp + ".C");
-
-                        for(int i = 0; i < weather.getConditions().length; i++){
-                            Log.i("Some", "Cond.: " + weather.getConditions()[i]);
-                        }
-                    }
-                });
     }
 
     @Override
     public void onConnectionSuspended(int i) {
+
+    }
+
+    private String getAddress(float latitude, float longitude) {
+        Geocoder geocoder = new Geocoder(this, Locale.getDefault());
+        String address="";
+        try {
+            List<Address> addresses = geocoder.getFromLocation(latitude, longitude, 1);
+            Address obj = addresses.get(0);
+            String  add = obj.getAddressLine(0);
+
+            Log.e("Location", "Address" + add);
+            address=add;
+
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+            Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
+        }
+        return address;
+    }
+
+    /*determine the type of user's activity */
+    private String determineActivity(float a){
+        String type_activity = "";
+        if( a > 0f && a < 1.5f){
+            type_activity = "still";
+        }
+        if( a > 1.5f && a <= 2.5f){
+            type_activity = "unknown";
+        }
+        if( a > 2.5f && a <= 3.5f){
+            type_activity = "in vehicle";
+        }
+        if( a > 3.5f && a <= 4.5f){
+            type_activity = "on bicycle";
+        }
+        if( a > 4.5f && a <= 5.5f){
+            type_activity = "on foot";
+        }
+        if( a > 5.5f && a <= 6.5f){
+            type_activity = "running";
+        }
+        if( a > 6.5f && a <= 7.5f){
+            type_activity = "walking";
+        }
+
+        return type_activity;
+    }
+
+    @Override
+    public void onInfoWindowClick(Marker marker) {
 
     }
 }

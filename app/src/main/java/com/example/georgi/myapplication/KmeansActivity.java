@@ -83,7 +83,7 @@ public class KmeansActivity extends AppCompatActivity {
                 switch (item.getItemId()){
 
                     case R.id.nav_home:
-                        Intent intent0 = new Intent(KmeansActivity.this, ParentActivity.class);
+                        Intent intent0 = new Intent(KmeansActivity.this, MainActivity.class);
                         startActivity(intent0);
                         break;
                     case R.id.nav_map:
@@ -100,7 +100,7 @@ public class KmeansActivity extends AppCompatActivity {
                         break;
 
                     case R.id.nav_notification:
-                        Intent intent4 = new Intent(KmeansActivity.this, NotificationsActivity.class);
+                        Intent intent4 = new Intent(KmeansActivity.this, KmeansActivity.class);
                         startActivity(intent4);
                         break;
 
@@ -561,7 +561,7 @@ public class KmeansActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        Intent intent=new Intent(KmeansActivity.this,ParentActivity.class);
+        Intent intent=new Intent(KmeansActivity.this,MainActivity.class);
         startActivity(intent);
         finish();
     }

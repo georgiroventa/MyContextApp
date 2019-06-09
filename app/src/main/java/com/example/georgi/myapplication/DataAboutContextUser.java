@@ -8,20 +8,20 @@ public class DataAboutContextUser {
     private int humidity, temperature;
     private float longitude, latitude;
     private double timeSlot;
+    private String activ;
 
     public DataAboutContextUser(){
 
     }
 
-    /*public DataAboutContextUser(String activityU, String headphone,int humidity, float latitude, float longitude, int temperature, SimpleDateFormat time) {
-        this.activityU = activityU;
-        this.headphone = headphone;
+    public DataAboutContextUser(String activ, int humidity, float latitude, float longitude, int temperature, long time) {
+        this.activ = activ;
         this.humidity = humidity;
-        this.latitide = latitude;
+        this.latitude = latitude;
         this.longitude = longitude;
         this.temperature = temperature;
         this.time = time;
-    }*/
+    }
 
     public int getActivityU() {
         return activityU;

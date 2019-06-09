@@ -1,5 +1,6 @@
 package com.example.georgi.myapplication;
 
+import android.annotation.SuppressLint;
 import android.location.Location;
 import android.os.Environment;
 import android.support.annotation.NonNull;
@@ -44,14 +45,13 @@ public class Snapshot extends AppCompatDialog implements GoogleApiClient.Connect
 
     private static final String TAG = "SnapshotApis";
     private GoogleApiClient mGoogleApiClient;
-    private FirebaseAuth mAuth =  FirebaseAuth.getInstance();;
-    private FirebaseDatabase database = FirebaseDatabase.getInstance();;
+    private FirebaseAuth mAuth =  FirebaseAuth.getInstance();
+    private FirebaseDatabase database = FirebaseDatabase.getInstance();
     private DatabaseReference mDatabase = database.getReference().child("DataAboutContextUser");
-    FirebaseUser firebaseUser = mAuth.getCurrentUser();;
+    FirebaseUser firebaseUser = mAuth.getCurrentUser();
     private static Context context;
 
     //create csv in external storage
-    public  File FILE_NAME = getPublicAlbumStorageDir("TestFile");
     public FileOutputStream fos;
 
     {
@@ -102,7 +102,7 @@ public class Snapshot extends AppCompatDialog implements GoogleApiClient.Connect
         super(context);
     }
 
-    public void buildApiClient() {
+    private void buildApiClient() {
         mGoogleApiClient = new GoogleApiClient.Builder(context)
                 .addApi(Awareness.API)
                 .addConnectionCallbacks(this)
@@ -183,6 +183,7 @@ public class Snapshot extends AppCompatDialog implements GoogleApiClient.Connect
      */
     //@RequiresPermission("android.permission.ACCESS_FINE_LOCATION")
 
+    @SuppressLint("MissingPermission")
     private void getLocation() {
         //noinspection MissingPermission
         Awareness.SnapshotApi.getLocation(mGoogleApiClient)
@@ -193,18 +194,14 @@ public class Snapshot extends AppCompatDialog implements GoogleApiClient.Connect
                             Log.i(TAG, "Could not get location.");
                             return;
                         }
-
                         //get location
                         Location location = locationResult.getLocation();
-                        String loc = "Latitudine: "+ location.getLatitude() + ",Longitudine: " + location.getLongitude();
                         float latitude = (float) location.getLatitude();
                         dataAboutContextUser.setLatitude(latitude);
                         float longitude = (float) location.getLongitude();
                         dataAboutContextUser.setLongitude(longitude);
                         flag = flag | bit2;
                         save();
-                        //mDatabase.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(timee).child("latitude").setValue(latitude);
-                        //mDatabase.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(timee).child("longitude").setValue(longitude);
                     }
                 });
     }
@@ -247,30 +244,27 @@ public class Snapshot extends AppCompatDialog implements GoogleApiClient.Connect
                     @Override
                     public void onResult(@NonNull DetectedActivityResult detectedActivityResult) {
                         if (!detectedActivityResult.getStatus().isSuccess()) {
-                            //Toast.makeText(SnapshotApiActivity.this, "Could not get the current activity.", Toast.LENGTH_LONG).show();
+                            Log.i(TAG, "Could not get type of activity.");
                             return;
                         }
                         ActivityRecognitionResult ar = detectedActivityResult.getActivityRecognitionResult();
                         DetectedActivity probableActivity = ar.getMostProbableActivity();
 
-                        //set the activity name
+                        //set activity's type
                         switch (probableActivity.getType()) {
                             case DetectedActivity.STILL:
                                 dataAboutContextUser.setActivityU(1);
-                                //mDatabase.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(timee).child("activity").setValue("Still");
-                                flag = flag | bit4;
-                                break;
-
-                            case DetectedActivity.UNKNOWN:
-                                dataAboutContextUser.setActivityU(2);
-                                //mDatabase.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(timee).child("activity").setValue("Unknown");
                                 flag = flag | bit4;
                                 break;
 
                             case DetectedActivity.IN_VEHICLE:
                                 dataAboutContextUser.setActivityU(3);
+                                flag = flag | bit4;;
+                                break;
+
+                            case DetectedActivity.UNKNOWN:
+                                dataAboutContextUser.setActivityU(2);
                                 flag = flag | bit4;
-                               // mDatabase.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(timee).child("activity").setValue("In vehicle");
                                 break;
 
                             case DetectedActivity.ON_BICYCLE:

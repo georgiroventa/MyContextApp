@@ -8,7 +8,6 @@ import android.util.Patterns;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ProgressBar;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -16,7 +15,6 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
 public class RegisterActivity extends AppCompatActivity implements View.OnClickListener{
@@ -116,10 +114,7 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
                             );
                             FirebaseUser user_ac = mAuth.getCurrentUser();
                             Toast.makeText( RegisterActivity.this, getString(R.string.registration_success), Toast.LENGTH_LONG).show();
-                            Intent start = new Intent(RegisterActivity.this, MainActivity.class);
-                            start.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                            start.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                            startActivity(start);
+
                             FirebaseDatabase.getInstance().getReference("Users")
                                     .child(FirebaseAuth.getInstance().getCurrentUser().getUid())
                                     .setValue(user).addOnCompleteListener(new OnCompleteListener<Void>() {
@@ -128,6 +123,10 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
                                     progressBar.setVisibility(View.GONE);
                                     if (task.isSuccessful()) {
                                         Toast.makeText( RegisterActivity.this, getString(R.string.registration_success), Toast.LENGTH_LONG).show();
+                                        Intent start = new Intent(RegisterActivity.this, LoginActivity.class);
+                                        start.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                                        start.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                                        startActivity(start);
                                     } else {
                                         //display a failure message
                                     }
@@ -152,7 +151,7 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
                 registerUser();
                 break;
             case R.id.button_login:
-                startActivity(new Intent(this, MainActivity.class));
+                startActivity(new Intent(this, LoginActivity.class));
 
         }
     }

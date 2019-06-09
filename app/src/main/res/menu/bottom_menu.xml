@@ -11,7 +11,7 @@
     <item
         android:id="@+id/nav_notification"
         android:icon="@drawable/ic_notification"
-        android:title="Notification" />
+        android:title="History" />
     <item
         android:id="@+id/nav_noise"
         android:icon="@drawable/ic_noise"

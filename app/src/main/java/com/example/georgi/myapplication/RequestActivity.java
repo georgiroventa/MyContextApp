@@ -65,7 +65,7 @@ public class RequestActivity extends AppCompatActivity {
                 switch (item.getItemId()){
 
                     case R.id.nav_home:
-                        Intent intent0 = new Intent(RequestActivity.this, ParentActivity.class);
+                        Intent intent0 = new Intent(RequestActivity.this, MainActivity.class);
                         startActivity(intent0);
                         break;
                     case R.id.nav_map:
@@ -81,7 +81,7 @@ public class RequestActivity extends AppCompatActivity {
                         break;
 
                     case R.id.nav_notification:
-                        Intent intent4 = new Intent(RequestActivity.this, NotificationsActivity.class);
+                        Intent intent4 = new Intent(RequestActivity.this, KmeansActivity.class);
                         startActivity(intent4);
                         break;
 
@@ -94,7 +94,6 @@ public class RequestActivity extends AppCompatActivity {
 
 
         locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
-
 
         listener = new LocationListener() {
             @Override
@@ -156,7 +155,7 @@ public class RequestActivity extends AppCompatActivity {
     }
     @Override
     public void onBackPressed() {
-        Intent intent=new Intent(RequestActivity.this,ParentActivity.class);
+        Intent intent=new Intent(RequestActivity.this,MainActivity.class);
         startActivity(intent);
         finish();
     }
