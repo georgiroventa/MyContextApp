@@ -62,7 +62,12 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
     private String humidity2 = "" + KmeansActivity.clusters[1][3];
     private String lat_lng1 = "Latitude: " + KmeansActivity.clusters[0][0] + " and " + "longitude: " + KmeansActivity.clusters[0][1];
     private String lat_lng2 = "Latitude: " + KmeansActivity.clusters[1][0] + " and " + "longitude: " + KmeansActivity.clusters[1][1];
-    private Object obj = new Object();
+    private long date1 = (long) KmeansActivity.clusters[0][5];
+    private long date2 = (long) KmeansActivity.clusters[1][5];
+    private String date1_string;
+    private String date2_string;
+
+
     //get current location
     private LocationManager locationManager;
     private LocationListener listener;
@@ -72,7 +77,6 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
     private final int REQ_PERMISSION = 5;
 
     HashMap<String, MarkerHolder> markerHolderMap1 = new HashMap<String, MarkerHolder>();
-    HashMap<String, MarkerHolder> markerHolderMap2 = new HashMap<String, MarkerHolder>();
     Marker marker1;
     Marker marker2;
 
@@ -100,6 +104,9 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         activity2 = determineActivity(KmeansActivity.clusters[1][4]);
         window1 = "Type of activity: " + activity1 + "\nTemperature: " + (int)KmeansActivity.clusters[0][2] + "(°C)" + " and " + (int)KmeansActivity.clusters[0][3] + "% humidity";
         window2 = "Type of activity: " + activity2 + "\nTemperature: " + (int)KmeansActivity.clusters[1][2] + "(°C)" + " and " + (int)KmeansActivity.clusters[1][3] + "% humidity";
+        date1_string = display_date(date1);
+        date2_string = display_date(date2);
+
         /*start bottom menu*/
         BottomNavigationView bottomNavigationView = (BottomNavigationView) findViewById(R.id.bottomNavView_Bar);
         Menu menu = bottomNavigationView.getMenu();
@@ -215,7 +222,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                     .strokeColor(Color.GREEN)
                     .fillColor(Color.rgb(153, 195, 216))
                     .clickable(true));
-       // circle1.setTag(new DataAboutContextUser("merege", 90, 45.56f, 21.57f, 27, 3456));
+
         circle2 = mMap2.addCircle(new CircleOptions()
                     .center(hcmus2)
                     .radius(100)
@@ -233,12 +240,16 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                 .position(hcmus1)
                 .title(location1)
                 .snippet(window1));
+
         marker2 = mMap2.addMarker(new MarkerOptions()
                 .position(hcmus2)
                 .title(location2)
                 .snippet(window2));
-        MarkerHolder mholder1 = new MarkerHolder(activity1, temperature1, humidity1, lat_lng1 );
+
+        MarkerHolder mholder1 = new MarkerHolder(activity1, temperature1, humidity1, lat_lng1, date1_string );
+        MarkerHolder mholder2 = new MarkerHolder(activity2, temperature2, humidity2, lat_lng2, date2_string );
         markerHolderMap1.put(marker1.getId(), mholder1);
+        markerHolderMap1.put(marker2.getId(),mholder2);
 
         mMap1.setInfoWindowAdapter(new GoogleMap.InfoWindowAdapter() {
             @Override
@@ -270,54 +281,13 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
 
                 tDates.setText("" + mHolder.latitude_longitude_marker );
 
-                //tPlaces.setText(mHolder.latitude_longitude_marker + " " + mHolder.activity_marker);
+                tPlaces.setText(""+ mHolder.date_marker );
 
                 return v;
             }
         });
 
         mMap1.setOnInfoWindowClickListener(this);
-
-
-        MarkerHolder mholder2 = new MarkerHolder(activity2, temperature2, humidity2, lat_lng2 );
-        markerHolderMap2.put(marker2.getId(), mholder2);
-
-        mMap2.setInfoWindowAdapter(new GoogleMap.InfoWindowAdapter() {
-            @Override
-            public View getInfoWindow(Marker arg0) {
-                return null;
-            }
-
-            @Override
-            public View getInfoContents(Marker arg0) {
-
-                View v = getLayoutInflater().inflate(R.layout.customlayout2, null);
-
-                TextView tLocation = (TextView) v.findViewById(R.id.paq2);
-
-                TextView tSnippet = (TextView) v.findViewById(R.id.names2);
-
-                TextView tDates = (TextView) v.findViewById(R.id.dates2);
-
-                TextView tPlaces = (TextView) v.findViewById(R.id.places2);
-
-                //These are standard, just uses the Title and Snippet
-                tLocation.setText(arg0.getTitle());
-
-                tSnippet.setText(arg0.getSnippet());
-
-                //Now get the extra info you need from the HashMap
-                //Store it in a MarkerHolder Object
-                MarkerHolder mHolder = markerHolderMap2.get(arg0.getId()); //use the ID to get the info
-
-                tDates.setText(mHolder.latitude_longitude_marker);
-
-                //tPlaces.setText(mHolder.latitude_longitude_marker + " " + mHolder.activity_marker);
-
-                return v;
-            }
-        });
-
 
 
         if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -333,25 +303,6 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         mMap.setMyLocationEnabled(true);
         mMap1.setMyLocationEnabled(true);
         mMap2.setMyLocationEnabled(true);
-    }
-    //create geofence
-    @NonNull
-    private Geofence getGeofence() {
-
-        return new Geofence.Builder()
-                .setRequestId("geofence cluster 1")
-                .setExpirationDuration(Geofence.NEVER_EXPIRE)
-                .setCircularRegion(KmeansActivity.clusters[0][0],KmeansActivity.clusters[0][1], 200)
-                .setNotificationResponsiveness(1000)
-                .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER | Geofence.GEOFENCE_TRANSITION_EXIT)
-                .build();
-    }
-
-    private GeofencingRequest getGeofencingRequest() {
-        GeofencingRequest.Builder builder = new GeofencingRequest.Builder();
-        builder.setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_ENTER);
-        builder.addGeofences((List<Geofence>) getGeofence());
-        return builder.build();
     }
 
 
@@ -418,6 +369,80 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         }
 
         return type_activity;
+    }
+
+    private String display_date(long n){
+        String date = "";
+
+        String day_week_string = "null";
+        String month_string = "null";
+        int day_week = (int) (n/10000);
+        int day = (int) ((n%10000)/100);
+        int month = (int) (n%100);
+        if(month < 10){
+            month = month % 10;
+        }
+        if(day_week == 1){
+            day_week_string = "Sunday, ";
+        }
+        if(day_week == 2){
+            day_week_string = "Monday, ";
+        }
+        if(day_week == 3){
+            day_week_string = "Tuesday, ";
+        }
+        if(day_week == 4){
+            day_week_string = "Wednesday, ";
+        }
+        if(day_week == 5){
+            day_week_string = "Thursday, ";
+        }
+        if(day_week == 6){
+            day_week_string = "Friday, ";
+        }
+        if(day_week == 7){
+            day_week_string = "Saturday, ";
+        }
+        if(month == 1){
+            month_string = " January";
+        }
+        if(month == 2){
+            month_string = " February";
+        }
+        if(month == 3){
+            month_string = " March";
+        }
+        if(month == 4){
+            month_string = " April";
+        }
+        if(month == 5){
+            month_string = " May";
+        }
+        if(month == 6){
+            month_string = " June";
+        }
+        if(month == 7){
+            month_string = " July";
+        }
+        if(month == 8){
+            month_string = " August";
+        }
+        if(month == 9){
+            month_string = " September";
+        }
+        if(month == 10){
+            month_string = " Octomber";
+        }
+        if(month == 11){
+            month_string = " November";
+        }
+        if(month == 12) {
+            month_string = " December";
+        }
+
+        date = "Date: " + day_week_string + "" +
+                "" + day + " " + month_string;
+        return date;
     }
 
     @Override

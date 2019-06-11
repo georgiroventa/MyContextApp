@@ -32,14 +32,15 @@ public class KmeansActivity extends AppCompatActivity {
     private float array_temperature[];
     private float array_humidity[];
     private float array_activity[];
-    private float array_timestamp[];
+    private float array_time[];
 
     private float matrix_latitude[][];
     private float matrix_longitude[][];
     private float matrix_temperture[][];
     private float matrix_humidity[][];
     private float matrix_activity[][];
-    public static float clusters[][] = new float[2][5];
+    private float matrix_time[][];
+    public static float clusters[][] = new float[2][6];
 
     //the history of clusters
     private String history_clusters = "";
@@ -53,12 +54,14 @@ public class KmeansActivity extends AppCompatActivity {
     float centroid_temperature[][];
     float centroid_humidity[][];
     float centroid_activity[][];
+    float centroid_time[][];
 
     float latitude;
     float longitude;
     float temperature;
     float humidity;
     float activity;
+    float time;
 
     //number of clusters
     int noOfClusters=2;
@@ -131,8 +134,8 @@ public class KmeansActivity extends AppCompatActivity {
         return array_activity;
     }
 
-    public float[] getArray_timestamp() {
-        return array_timestamp;
+    public float[] getArray_time() {
+        return array_time;
     }
 
     public void setArray_latitude(float[] array_latitude) {
@@ -155,8 +158,8 @@ public class KmeansActivity extends AppCompatActivity {
         this.array_activity = array_activity;
     }
 
-    public void setArray_timestamp(float[] array_timestamp) {
-        this.array_timestamp = array_timestamp;
+    public void setArray_time(float[] array_time) {
+        this.array_time = array_time;
     }
 
     public void colectData(){
@@ -176,7 +179,7 @@ public class KmeansActivity extends AppCompatActivity {
                 array_temperature = new float[no];
                 array_humidity = new float[no];
                 array_activity = new float[no];
-                array_timestamp = new float[no];
+                array_time = new float[no];
 
                 //initialize the matrices
                 matrix_latitude = new float[noOfClusters][no];
@@ -184,11 +187,11 @@ public class KmeansActivity extends AppCompatActivity {
                 matrix_temperture = new float[noOfClusters][no];
                 matrix_humidity = new float[noOfClusters][no];
                 matrix_activity = new float[noOfClusters][no];
+                matrix_time = new float[noOfClusters][no];
 
                 for(DataSnapshot some : dataSnapshot.getChildren()) {
                     for (DataSnapshot result : some.getChildren()) {
-                        //Log.i("copii", result.getKey().toString());
-                        //Log.i("cevaaa1", String.valueOf(result.child("latitude").getValue(Double.class)));
+
                         if(result.child("latitude").getValue(Double.class) != null) {
                             latitude = result.child("latitude").getValue(Double.class).floatValue();
                         }
@@ -202,7 +205,6 @@ public class KmeansActivity extends AppCompatActivity {
                         if(result.child("temperature (°C)").getValue(Double.class) != null ){
                             temperature = result.child("temperature (°C)").getValue(Double.class).floatValue();
                         }
-
                         array_temperature[i] = temperature;
 
                         if(result.child("humidity").getValue(Double.class) != null) {
@@ -213,20 +215,29 @@ public class KmeansActivity extends AppCompatActivity {
                         if(result.child("activity").getValue(Double.class) != null){
                             activity = result.child("activity").getValue(Double.class).floatValue();
                         }
-
                         array_activity[i] = activity;
-                        //float timestamp = result.child("timestamp").getValue(Long.class).floatValue();
-                        //array_timestamp[i] = timestamp;
+
+                        if(result.child("time").getValue(Long.class) != null){
+                            time = result.child("time").getValue(Long.class).floatValue();
+                        }
+                        array_time[i] = time;
 
                         i++;
                     }
                 }
+
+                System.out.println("sunt aiiiiciciii");
+                for(int g = 0; g < array_time.length; g++){
+                    System.out.print(", " + array_time[g]);
+                }
+                System.out.println();
+
                 setArray_latitude(array_latitude);
                 setArray_longitude(array_longitude);
                 setArray_temperature(array_temperature);
                 setArray_humidity(array_humidity);
                 setArray_activity(array_activity);
-                //setArray_timestamp(array_timestamp);
+                setArray_time(array_time);
 
                 float min_lat = min_function(array_latitude);
                 System.out.println(min_lat + "min_lat");
@@ -265,6 +276,13 @@ public class KmeansActivity extends AppCompatActivity {
                         {min_activity,max_activity}
                 };
 
+                float min_time = min_function(array_time);
+                float max_time = max_function(array_time);
+                centroid_time = new float[][]{
+                        {0,0},
+                        {min_time,max_time}
+                };
+
                 flag = 1;
 
                 verify();
@@ -290,8 +308,13 @@ public class KmeansActivity extends AppCompatActivity {
                 }
                 System.out.println();
             }
-            int lat = closest(m1[1][0], array_latitude);
-            System.out.println( "LATITUDINE" + array_latitude[lat]);
+
+
+            int lat1 = closest(m1[1][0], array_latitude);
+            System.out.println( "LATITUDINE1" + array_latitude[lat1]);
+            int lat2 = closest(m1[1][1], array_latitude);
+            System.out.println( "LATITUDINE2" + array_latitude[lat2]);
+
             clusters[0][0] = m1[1][0];
             clusters[1][0] = m1[1][1];
 
@@ -306,8 +329,6 @@ public class KmeansActivity extends AppCompatActivity {
             }
             int longi = closest(m2[1][0], array_longitude);
             System.out.println("LONGITUDINE" + array_longitude[longi]);
-            //clusters[0][0] = m1[1][0];
-            //clusters[1][0] = m1[1][1];
 
 
             System.out.println("temperatura");
@@ -321,8 +342,6 @@ public class KmeansActivity extends AppCompatActivity {
             }
             int temp = closest(m3[1][0], array_temperature);
             System.out.println("TEMPERATURA" + array_temperature[temp]);
-            //clusters[0][0] = m1[1][0];
-            //clusters[1][0] = m1[1][1];
 
 
             System.out.println("humidity");
@@ -336,8 +355,7 @@ public class KmeansActivity extends AppCompatActivity {
             }
             int hum = closest(m4[1][0], array_humidity);
             System.out.println("HUMIDITY" + array_humidity[hum]);
-            //clusters[0][0] = m1[1][0];
-            //clusters[1][0] = m1[1][1];
+
 
             System.out.println("activity");
             System.out.println("======================================== ");
@@ -348,14 +366,29 @@ public class KmeansActivity extends AppCompatActivity {
                 }
                 System.out.println();
             }
-            int act = closest(m5[1][0], array_humidity);
-            System.out.println("ACTIVITY" + array_humidity[act]);
+            int act = closest(m5[1][0], array_activity);
+            System.out.println("ACTIVITY" + array_activity[act]);
+
+
+            System.out.println("time");
+            System.out.println("======================================== ");
+            float m6[][] = getCentroid(matrix_time, array_time, noOfClusters, centroid_time);
+            for(int i = 0; i < matrix_time.length; i++){
+                for(int j = 0; j < matrix_time[i].length; j++){
+                    System.out.print(matrix_time[i][j] + ",");
+                }
+                System.out.println();
+            }
+            int time1 = closest(m6[1][0], array_time);
+            System.out.println("TIME1_" + array_time[time1]);
+            int time2 = closest(m6[1][1], array_time);
+            System.out.println("TIME2_" + array_time[time2]);
 
 
             for(int i = 0; i < matrix_longitude.length - 1; i++){
                 int flag = 0;
                 for(int j = 0; j < matrix_longitude[i].length; j++){
-                    if(array_longitude[lat] == matrix_longitude[i][j]){
+                    if(array_longitude[lat1] == matrix_longitude[i][j]){
                         flag = 1;
                     }
                     if(flag == 1){
@@ -372,7 +405,7 @@ public class KmeansActivity extends AppCompatActivity {
             for(int i = 0; i < matrix_temperture.length - 1; i++){
                 int flag = 0;
                 for(int j = 0; j < matrix_temperture[i].length; j++){
-                    if(array_temperature[lat] == matrix_temperture[i][j]){
+                    if(array_temperature[lat1] == matrix_temperture[i][j]){
                         flag = 1;
                     }
                     if(flag == 1){
@@ -389,7 +422,7 @@ public class KmeansActivity extends AppCompatActivity {
             for(int i = 0; i < matrix_humidity.length - 1; i++){
                 int flag = 0;
                 for(int j = 0; j < matrix_humidity[i].length; j++){
-                    if(array_humidity[lat] == matrix_humidity[i][j]){
+                    if(array_humidity[lat1] == matrix_humidity[i][j]){
                         flag = 1;
                     }
                     if(flag == 1){
@@ -406,7 +439,7 @@ public class KmeansActivity extends AppCompatActivity {
             for(int i = 0; i < matrix_activity.length - 1; i++){
                 int flag = 0;
                 for(int j = 0; j < matrix_activity[i].length; j++){
-                    if(array_activity[lat] == matrix_activity[i][j]){
+                    if(array_activity[lat1] == matrix_activity[i][j]){
                         flag = 1;
                     }
                     if(flag == 1){
@@ -417,6 +450,24 @@ public class KmeansActivity extends AppCompatActivity {
                     {
                         clusters[0][4] = m5[1][1];
                         clusters[1][4] = m5[1][0];
+                    }
+                }
+            }
+
+            for(int i = 0; i < matrix_time.length - 1; i++){
+                int flag = 0;
+                for(int j = 0; j < matrix_time[i].length; j++){
+                    if(array_activity[lat1] == matrix_time[i][j]){
+                        flag = 1;
+                    }
+                    if(flag == 1){
+                        clusters[0][5] = array_time[time1];
+                        clusters[1][5] = array_time[time2];
+                    }
+                    else
+                    {
+                        clusters[0][5] = array_time[time2];
+                        clusters[1][5] = array_time[time1];
                     }
                 }
             }
@@ -433,17 +484,6 @@ public class KmeansActivity extends AppCompatActivity {
             }
             history.setText(history_clusters);
             flag = 0;
-
-            //send the clusters to MapActivity
-           // for(int i = 0; i < noOfClusters; i++) {
-              //  Intent cluster1 = new Intent(this, MapActivity.class);
-               // cluster1.putExtra("cluster1", clusters[0]);
-                //startActivity(cluster1);
-
-          // Intent cluster2 = new Intent(KmeansActivity.this, MapActivity.class);
-            //cluster2.putExtra("cluster2", clusters[1]);
-            //startActivity(cluster2);
-           // }
         }
 
     }
