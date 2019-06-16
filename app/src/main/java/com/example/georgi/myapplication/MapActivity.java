@@ -102,8 +102,8 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         location2 = getAddress(KmeansActivity.clusters[1][0], KmeansActivity.clusters[1][1]);
         activity1 = determineActivity(KmeansActivity.clusters[0][4]);
         activity2 = determineActivity(KmeansActivity.clusters[1][4]);
-        window1 = "Type of activity: " + activity1 + "\nTemperature: " + (int)KmeansActivity.clusters[0][2] + "(°C)" + " and " + (int)KmeansActivity.clusters[0][3] + "% humidity";
-        window2 = "Type of activity: " + activity2 + "\nTemperature: " + (int)KmeansActivity.clusters[1][2] + "(°C)" + " and " + (int)KmeansActivity.clusters[1][3] + "% humidity";
+        window1 = "Type of activity: " + activity1 + "\nTemperature: " + (int)KmeansActivity.clusters[0][2] + "(°C)" + " and " + (int)KmeansActivity.clusters[0][3] + "% humidity" + "\n Headphone: Unplugged";
+        window2 = "Type of activity: " + activity2 + "\nTemperature: " + (int)KmeansActivity.clusters[1][2] + "(°C)" + " and " + (int)KmeansActivity.clusters[1][3] + "% humidity" + "\n Headphone: Unplugged";
         date1_string = display_date(date1);
         date2_string = display_date(date2);
 
@@ -134,8 +134,6 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                         Intent intent3 = new Intent(MapActivity.this, RequestActivity.class);
                         startActivity(intent3);
                         break;
-
-
 
                     case R.id.nav_notification:
                         Intent intent4 = new Intent(MapActivity.this, KmeansActivity.class);
@@ -279,9 +277,9 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                 //Store it in a MarkerHolder Object
                 MarkerHolder mHolder = markerHolderMap1.get(arg0.getId()); //use the ID to get the info
 
-                tDates.setText("" + mHolder.latitude_longitude_marker );
+                tDates.setText(" " + mHolder.latitude_longitude_marker );
 
-                tPlaces.setText(""+ mHolder.date_marker );
+                tPlaces.setText(" "+ mHolder.date_marker );
 
                 return v;
             }

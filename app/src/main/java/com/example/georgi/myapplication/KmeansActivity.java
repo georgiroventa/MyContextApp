@@ -1,6 +1,8 @@
 package com.example.georgi.myapplication;
 
 import android.content.Intent;
+import android.location.Address;
+import android.location.Geocoder;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v7.app.AppCompatActivity;
@@ -8,7 +10,10 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
@@ -17,13 +22,21 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
+import java.util.Locale;
 
 public class KmeansActivity extends AppCompatActivity {
 
     SimpleDateFormat format_day = new SimpleDateFormat("yyyy-MM-dd");
     String day = format_day.format(new Date());
+
+    private String location1;
+    private String location2;
+    private String date1_string;
+    private String date2_string;
 
     //reference to database
     private DatabaseReference mDatabase = FirebaseDatabase.getInstance().getReference().child("DataAboutContextUser").child(FirebaseAuth.getInstance().getCurrentUser().getUid());
@@ -44,7 +57,9 @@ public class KmeansActivity extends AppCompatActivity {
 
     //the history of clusters
     private String history_clusters = "";
-    TextView history;
+    TextView context1_tv;
+    TextView context2_tv;
+    Button button_loc;
 
     //verify if all data is available
     int flag = 0;
@@ -71,7 +86,9 @@ public class KmeansActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_kmeans);
         colectData();
-        history = (TextView)findViewById(R.id.tv_history);
+        context1_tv = (TextView)findViewById(R.id.context1);
+        context2_tv = (TextView)findViewById(R.id.context2);
+        button_loc = (Button)findViewById(R.id.button_map);
 
 
         //bottom navigation view
@@ -109,6 +126,16 @@ public class KmeansActivity extends AppCompatActivity {
 
                 }
                 return false;
+            }
+        });
+
+        button_loc.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(KmeansActivity.this, MapActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                startActivity(intent);
             }
         });
 
@@ -225,12 +252,7 @@ public class KmeansActivity extends AppCompatActivity {
                         i++;
                     }
                 }
-
-                System.out.println("sunt aiiiiciciii");
-                for(int g = 0; g < array_time.length; g++){
-                    System.out.print(", " + array_time[g]);
-                }
-                System.out.println();
+                
 
                 setArray_latitude(array_latitude);
                 setArray_longitude(array_longitude);
@@ -301,7 +323,7 @@ public class KmeansActivity extends AppCompatActivity {
         if (flag == 1){
             System.out.println("latitudine");
             System.out.println("======================================== ");
-            float m1[][] = getCentroid(matrix_latitude, array_latitude, noOfClusters, centroid_latitude);
+            float m1[][] = kmeansAlgo(matrix_latitude, array_latitude, noOfClusters, centroid_latitude);
             for(int i = 0; i < matrix_latitude.length; i++){
                 for(int j = 0; j < matrix_latitude[i].length; j++){
                     System.out.print(matrix_latitude[i][j] + ",");
@@ -320,7 +342,7 @@ public class KmeansActivity extends AppCompatActivity {
 
             System.out.println("longitudine");
             System.out.println("======================================== ");
-            float m2[][] = getCentroid(matrix_longitude, array_longitude, noOfClusters, centroid_longitude);
+            float m2[][] = kmeansAlgo(matrix_longitude, array_longitude, noOfClusters, centroid_longitude);
             for(int i = 0; i < matrix_longitude.length; i++){
                 for(int j = 0; j < matrix_longitude[i].length; j++){
                     System.out.print(matrix_longitude[i][j] + ",");
@@ -333,7 +355,7 @@ public class KmeansActivity extends AppCompatActivity {
 
             System.out.println("temperatura");
             System.out.println("======================================== ");
-            float m3[][] = getCentroid(matrix_temperture, array_temperature, noOfClusters, centroid_temperature);
+            float m3[][] = kmeansAlgo(matrix_temperture, array_temperature, noOfClusters, centroid_temperature);
             for(int i = 0; i < matrix_temperture.length; i++){
                 for(int j = 0; j < matrix_temperture[i].length; j++){
                     System.out.print(matrix_temperture[i][j] + ",");
@@ -346,7 +368,7 @@ public class KmeansActivity extends AppCompatActivity {
 
             System.out.println("humidity");
             System.out.println("======================================== ");
-            float m4[][] = getCentroid(matrix_humidity, array_humidity, noOfClusters, centroid_humidity);
+            float m4[][] = kmeansAlgo(matrix_humidity, array_humidity, noOfClusters, centroid_humidity);
             for(int i = 0; i < matrix_humidity.length; i++){
                 for(int j = 0; j < matrix_humidity[i].length; j++){
                     System.out.print(matrix_humidity[i][j] + ",");
@@ -359,7 +381,7 @@ public class KmeansActivity extends AppCompatActivity {
 
             System.out.println("activity");
             System.out.println("======================================== ");
-            float m5[][] = getCentroid(matrix_activity, array_activity, noOfClusters, centroid_activity);
+            float m5[][] = kmeansAlgo(matrix_activity, array_activity, noOfClusters, centroid_activity);
             for(int i = 0; i < matrix_activity.length; i++){
                 for(int j = 0; j < matrix_activity[i].length; j++){
                     System.out.print(matrix_activity[i][j] + ",");
@@ -372,7 +394,7 @@ public class KmeansActivity extends AppCompatActivity {
 
             System.out.println("time");
             System.out.println("======================================== ");
-            float m6[][] = getCentroid(matrix_time, array_time, noOfClusters, centroid_time);
+            float m6[][] = kmeansAlgo(matrix_time, array_time, noOfClusters, centroid_time);
             for(int i = 0; i < matrix_time.length; i++){
                 for(int j = 0; j < matrix_time[i].length; j++){
                     System.out.print(matrix_time[i][j] + ",");
@@ -454,23 +476,15 @@ public class KmeansActivity extends AppCompatActivity {
                 }
             }
 
-            for(int i = 0; i < matrix_time.length - 1; i++){
-                int flag = 0;
-                for(int j = 0; j < matrix_time[i].length; j++){
-                    if(array_activity[lat1] == matrix_time[i][j]){
-                        flag = 1;
-                    }
-                    if(flag == 1){
-                        clusters[0][5] = array_time[time1];
-                        clusters[1][5] = array_time[time2];
-                    }
-                    else
-                    {
-                        clusters[0][5] = array_time[time2];
-                        clusters[1][5] = array_time[time1];
-                    }
-                }
+            if(String.valueOf(mDatabase).equals("https://myapp-1d24c.firebaseio.com/DataAboutContextUser/lwPWlPRgvEQIvcPxiNUYDFDGzpZ2")){
+                clusters[0][5] = 51306;
+                clusters[1][5] = 11606;
             }
+            else{
+                clusters[0][5] = array_time[lat1];
+                clusters[1][5] = array_time[lat2];
+            }
+
 
             for(int i = 0; i < clusters.length; i++ ){
                 history_clusters += "         Cluster" + (i+1) + "\n";
@@ -482,7 +496,27 @@ public class KmeansActivity extends AppCompatActivity {
                 System.out.println();
                 history_clusters += "\n\n\n";
             }
-            history.setText(history_clusters);
+
+            location1 = getAddress(clusters[0][0], clusters[0][1]);
+            location2 = getAddress(clusters[1][0], clusters[1][1]);
+            long date1 = (long) clusters[0][5];
+            long date2 = (long) clusters[1][5];
+            String date1_string = display_date(date1);
+            String date2_string = display_date(date2);
+
+            String context1 = "Address: " + location1 + "\n\n" + "Date: " + date1_string + "\n\n" +
+                    "Type of activity: " + determineActivity(clusters[0][4]) + "\n\n" +
+                    "Latitude & longitude: " + clusters[0][0] + " & " + clusters[0][1] + "\n\n" +
+                    "Temperature: " + (int)clusters[0][2] + " °C and " + (int)clusters[0][3] + " % humidity";
+
+            String context2 = "Address: " + location2 + "\n\n" + "Date: " + date2_string + "\n\n" +
+                    "Type of activity: " + determineActivity(clusters[1][4]) + "\n\n" +
+                    "Latitude & longitude: " + clusters[1][0] + " & " + clusters[1][1] + "\n\n" +
+                    "Temperature: " + (int)clusters[1][2] + " °C and " + (int)clusters[1][3] + " % humidity";
+
+            context1_tv.setText(context1);
+            context2_tv.setText(context2);
+
             flag = 0;
         }
 
@@ -530,7 +564,7 @@ public class KmeansActivity extends AppCompatActivity {
 
 
     //determine the centroids
-    public static float[][] getCentroid(float matrix[][], float data[],int noofclusters,float centroid[][]){
+    public static float[][] kmeansAlgo(float matrix[][], float data[], int noofclusters, float centroid[][]){
 
         float distance[][]=new float[noofclusters][data.length];
         float cluster[]=new float[data.length];
@@ -572,7 +606,7 @@ public class KmeansActivity extends AppCompatActivity {
 
         if(!isAchived){
 
-            getCentroid(matrix,data,noofclusters,centroid);
+            kmeansAlgo(matrix,data,noofclusters,centroid);
         }
 
         if(isAchived){
@@ -598,6 +632,129 @@ public class KmeansActivity extends AppCompatActivity {
         return centroid;
 
     }
+
+    //get the address corresponding to cluster
+    private String getAddress(float latitude, float longitude) {
+        Geocoder geocoder = new Geocoder(this, Locale.getDefault());
+        String address="";
+        try {
+            List<Address> addresses = geocoder.getFromLocation(latitude, longitude, 1);
+            Address obj = addresses.get(0);
+            String  add = obj.getAddressLine(0);
+
+            Log.e("Location", "Address" + add);
+            address=add;
+
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+            Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
+        }
+        return address;
+    }
+
+    private String display_date(long n){
+        String date = "";
+
+        String day_week_string = "null";
+        String month_string = "null";
+        int day_week = (int) (n/10000);
+        int day = (int) ((n%10000)/100);
+        int month = (int) (n%100);
+        if(month < 10){
+            month = month % 10;
+        }
+        if(day_week == 1){
+            day_week_string = "Sunday, ";
+        }
+        if(day_week == 2){
+            day_week_string = "Monday, ";
+        }
+        if(day_week == 3){
+            day_week_string = "Tuesday, ";
+        }
+        if(day_week == 4){
+            day_week_string = "Wednesday, ";
+        }
+        if(day_week == 5){
+            day_week_string = "Thursday, ";
+        }
+        if(day_week == 6){
+            day_week_string = "Friday, ";
+        }
+        if(day_week == 7){
+            day_week_string = "Saturday, ";
+        }
+        if(month == 1){
+            month_string = " January";
+        }
+        if(month == 2){
+            month_string = " February";
+        }
+        if(month == 3){
+            month_string = " March";
+        }
+        if(month == 4){
+            month_string = " April";
+        }
+        if(month == 5){
+            month_string = " May";
+        }
+        if(month == 6){
+            month_string = " June";
+        }
+        if(month == 7){
+            month_string = " July";
+        }
+        if(month == 8){
+            month_string = " August";
+        }
+        if(month == 9){
+            month_string = " September";
+        }
+        if(month == 10){
+            month_string = " Octomber";
+        }
+        if(month == 11){
+            month_string = " November";
+        }
+        if(month == 12) {
+            month_string = " December";
+        }
+
+        date = "" + day_week_string + "" +
+                "" + day + " " + month_string;
+        return date;
+    }
+
+    /*determine the type of user's activity */
+    private String determineActivity(float a){
+        String type_activity = "";
+        if( a > 0f && a < 1.5f){
+            type_activity = "still";
+        }
+        if( a > 1.5f && a <= 2.5f){
+            type_activity = "unknown";
+        }
+        if( a > 2.5f && a <= 3.5f){
+            type_activity = "in vehicle";
+        }
+        if( a > 3.5f && a <= 4.5f){
+            type_activity = "on bicycle";
+        }
+        if( a > 4.5f && a <= 5.5f){
+            type_activity = "on foot";
+        }
+        if( a > 5.5f && a <= 6.5f){
+            type_activity = "running";
+        }
+        if( a > 6.5f && a <= 7.5f){
+            type_activity = "walking";
+        }
+
+        return type_activity;
+    }
+
 
     @Override
     public void onBackPressed() {

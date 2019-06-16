@@ -1,6 +1,5 @@
 package com.example.georgi.myapplication;
 
-import java.text.SimpleDateFormat;
 
 public class DataAboutContextUser {
     private int activityU, headphone;

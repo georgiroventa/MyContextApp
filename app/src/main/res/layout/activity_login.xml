@@ -42,7 +42,7 @@
             android:id="@+id/edit_text_email"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:drawableLeft="@drawable/ic_email"
+            android:drawableLeft="@drawable/ic_contact_mail"
             android:drawablePadding="@dimen/drawable_padding"
             android:hint="@string/email"
             android:inputType="textEmailAddress"
@@ -55,7 +55,7 @@
             android:id="@+id/edit_text_password"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:drawableLeft="@drawable/ic_password"
+            android:drawableLeft="@drawable/ic_lock_black"
             android:drawablePadding="@dimen/drawable_padding"
             android:hint="@string/password"
             android:inputType="textPassword"
@@ -70,7 +70,10 @@
             android:background="@color/colorBackground"
             android:text="Login"
             android:textAllCaps="false"
-            android:textColor="@color/colorHint" />
+            android:layout_marginTop="20dp"
+            android:textSize="25dp"
+            android:textColor="@color/colorText" />
+
         <TextView
             android:id="@+id/button_register"
             android:layout_width="match_parent"
@@ -78,6 +81,7 @@
             android:textAllCaps="false"
             android:layout_below="@+id/button_login"
             android:textSize="15dp"
+            android:layout_marginTop="10dp"
             android:padding="20dp"
             android:text="Don't have account? Please sign up here!" />
 

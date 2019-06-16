@@ -171,8 +171,6 @@ public class Snapshot extends AppCompatDialog implements GoogleApiClient.Connect
                         flag = flag | bit1;
                         Log.i("humidity_context", String.valueOf(dataAboutContextUser.getHumidity()));
                         save();
-                        //mDatabase.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(timee).child("temperature (°C)").setValue(temperature);
-                        //mDatabase.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(timee).child("humidity").setValue(humidity);
                     }
                 });
 
@@ -226,8 +224,6 @@ public class Snapshot extends AppCompatDialog implements GoogleApiClient.Connect
                         dataAboutContextUser.setHeadphone(headphoneStatus);
                         flag = flag | bit3;
                         save();
-                       // mDatabase.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(timee).child("headphone").setValue(headphoneStatus);
-
 
                     }
                 });
@@ -321,7 +317,6 @@ public class Snapshot extends AppCompatDialog implements GoogleApiClient.Connect
                         dataAboutContextUser.setTimeSlot(timeSlot);
                         flag = flag | bit5;
                         save();
-                        //mDatabase.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(timee).child("time").setValue(sdf);
                     }
                 });
     }
@@ -398,7 +393,6 @@ public class Snapshot extends AppCompatDialog implements GoogleApiClient.Connect
                 .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(final DialogInterface dialogInterface, final int i) {
-                        //context.getApplicationContext().finish();
                     }
                 }).show();
     }

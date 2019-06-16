@@ -47,7 +47,7 @@ public class RequestActivity extends AppCompatActivity {
             public void onClick(View view){
                 Calendar calendar = Calendar.getInstance();
                 SimpleDateFormat format = new SimpleDateFormat("EEEE, dd-MM-yyyy 'at' hh:mm:ss a ");
-                String time = "Current Time: " + format.format(calendar.getTime());
+                String time = "" + format.format(calendar.getTime());
                 t1.setText(time);
 
             }
@@ -77,7 +77,8 @@ public class RequestActivity extends AppCompatActivity {
                         startActivity(intent2);
                         break;
                     case R.id.nav_coordinates:
-
+                        Intent intent3 = new Intent(RequestActivity.this, RequestActivity.class);
+                        startActivity(intent3);
                         break;
 
                     case R.id.nav_notification:

@@ -14,30 +14,73 @@
         android:gravity="center"
         android:text="My context data"
         android:textAlignment="center"
+        android:textColor="#5a5893"
         android:textSize="45sp" />
 
 
 
 
     <TextView
+        android:id="@+id/name_time_tv"
+        android:layout_width="120dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="35dp"
+        android:text="Current time: "
+        android:textStyle="italic|bold"
+        android:textSize="16dp"
+        android:textColor="#5a5893"
+        android:layout_below="@id/Title"
+        android:layout_marginTop="40dp"/>
+
+    <TextView
         android:id="@+id/date_time_tv"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="39dp"
-        android:text="Date and current time: "
+        android:text=""
+        android:layout_toEndOf="@+id/name_time_tv"
         android:textStyle="italic"
+        android:textSize="15dp"
+        android:textColor="#5a5893"
         android:layout_below="@id/Title"
         android:layout_marginTop="40dp"/>
 
+
+    <TextView
+        android:id="@+id/name_activity_tv"
+        android:layout_width="120dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="35dp"
+        android:text="User's activity: "
+        android:textStyle="italic|bold"
+        android:textSize="16dp"
+        android:textColor="#5a5893"
+        android:layout_below="@id/name_time_tv"
+        android:layout_marginTop="20dp"/>
 
     <TextView
         android:id="@+id/activity_tv"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="39dp"
-        android:text="User's activity: "
+        android:text=""
         android:textStyle="italic"
+        android:textSize="15dp"
+        android:textColor="#5a5893"
+        android:layout_toEndOf="@id/name_activity_tv"
         android:layout_below="@id/date_time_tv"
+        android:layout_marginTop="20dp"/>
+
+    <TextView
+        android:id="@+id/name_time_sec_tv"
+        android:layout_width="120dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="35dp"
+        android:text="Time in seconds: "
+        android:textStyle="italic|bold"
+        android:textSize="16dp"
+        android:textColor="#5a5893"
+        android:layout_below="@id/activity_tv"
         android:layout_marginTop="20dp"/>
 
     <TextView
@@ -45,9 +88,25 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="39dp"
-        android:text="Time in seconds: "
+        android:text=""
         android:textStyle="italic"
+        android:textSize="15dp"
+        android:textColor="#5a5893"
         android:layout_below="@id/activity_tv"
+        android:layout_toEndOf="@id/name_time_sec_tv"
+        android:layout_marginTop="20dp"/>
+
+
+    <TextView
+        android:id="@+id/name_date_format_tv"
+        android:layout_width="120dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="35dp"
+        android:text="Date: "
+        android:textStyle="italic|bold"
+        android:textSize="16dp"
+        android:textColor="#5a5893"
+        android:layout_below="@id/time_sec_tv"
         android:layout_marginTop="20dp"/>
 
     <TextView
@@ -55,9 +114,25 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="39dp"
-        android:text="Date(dayOfWeek_dayOfMonth_month): "
+        android:text=""
         android:textStyle="italic"
+        android:textSize="15dp"
+        android:textColor="#5a5893"
+        android:layout_toEndOf="@id/name_date_format_tv"
         android:layout_below="@id/time_sec_tv"
+        android:layout_marginTop="20dp"/>
+
+
+    <TextView
+        android:id="@+id/name_time_slot_tv"
+        android:layout_width="120dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="35dp"
+        android:text="Time slot: "
+        android:textStyle="italic|bold"
+        android:textSize="16dp"
+        android:textColor="#5a5893"
+        android:layout_below="@id/date_format_tv"
         android:layout_marginTop="20dp"/>
 
     <TextView
@@ -65,29 +140,74 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="39dp"
-        android:text="Time slot: "
+        android:text=""
         android:textStyle="italic"
+        android:textSize="15dp"
+        android:textColor="#5a5893"
+        android:layout_toEndOf="@id/name_time_slot_tv"
         android:layout_below="@id/date_format_tv"
         android:layout_marginTop="20dp"/>
 
     <TextView
-    android:id="@+id/headphone_tv"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:layout_marginStart="39dp"
-    android:text="Headphone status: "
-    android:textStyle="italic"
-    android:layout_below="@id/time_slot_tv"
-    android:layout_marginTop="20dp"/>
+        android:id="@+id/name_headphone_tv"
+        android:layout_width="120dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="35dp"
+        android:text="Headphone "
+        android:textStyle="italic|bold"
+        android:textSize="16dp"
+        android:textColor="#5a5893"
+        android:layout_below="@id/time_slot_tv"
+        android:layout_marginTop="20dp"/>
+
+    <TextView
+        android:id="@+id/headphone_tv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="39dp"
+        android:text=""
+        android:textStyle="italic"
+        android:textSize="15dp"
+        android:textColor="#5a5893"
+        android:layout_toEndOf="@id/name_headphone_tv"
+        android:layout_below="@id/time_slot_tv"
+        android:layout_marginTop="20dp"/>
+
+    <TextView
+        android:id="@+id/name_location_tv"
+        android:layout_width="120dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="35dp"
+        android:text="Current location: "
+        android:textStyle="italic|bold"
+        android:textSize="16dp"
+        android:textColor="#5a5893"
+        android:layout_below="@id/headphone_tv"
+        android:layout_marginTop="20dp"/>
 
     <TextView
         android:id="@+id/location_tv"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="39dp"
-        android:text="Current location: "
+        android:text=""
         android:textStyle="italic"
+        android:textSize="15dp"
+        android:textColor="#5a5893"
+        android:layout_toEndOf="@id/name_location_tv"
         android:layout_below="@id/headphone_tv"
+        android:layout_marginTop="20dp"/>
+
+    <TextView
+        android:id="@+id/name_weather_tv"
+        android:layout_width="120dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="35dp"
+        android:text="Current weather: "
+        android:textStyle="italic|bold"
+        android:textSize="16dp"
+        android:textColor="#5a5893"
+        android:layout_below="@id/location_tv"
         android:layout_marginTop="20dp"/>
 
     <TextView
@@ -95,8 +215,11 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="39dp"
-        android:text="Current weather: "
+        android:text=""
         android:textStyle="italic"
+        android:textSize="15dp"
+        android:textColor="#5a5893"
+        android:layout_toEndOf="@id/name_weather_tv"
         android:layout_below="@id/location_tv"
         android:layout_marginTop="20dp"/>
 

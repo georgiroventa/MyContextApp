@@ -123,17 +123,11 @@ public class LoginActivity extends Activity implements OnClickListener {
     @Override
     public void onRequestPermissionsResult(final int requestCode, @NonNull final String[] permissions, @NonNull final int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        //if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
         switch (requestCode) {
             case GET_PERMISSION_REQUEST_CODE://location permission granted
                 //callWorker();
                 break;
         }
-        // }
-        // else {
-        // Toast.makeText(SnapshotApiActivity.this, "Permission was not granted.", Toast.LENGTH_LONG).show();
-        //}
-
     }
 
 

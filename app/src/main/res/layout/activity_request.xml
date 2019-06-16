@@ -10,32 +10,47 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="com.example.georgi.myapplication.RequestActivity">
 
+    <TextView
+        android:id="@+id/title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:fontFamily="cursive"
+        android:text="Geographic coordinates"
+        android:textAlignment="center"
+        android:textColor="#5a5893"
+        android:textSize="@dimen/app_name_size" />
 
     <Button
         android:id="@+id/button1"
-        android:layout_width="wrap_content"
+        android:layout_width="180dp"
         android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="60dp"
+        android:layout_marginTop="40dp"
+        android:layout_below="@id/title"
+        android:background="@color/colorBackground"
+        android:textColor="@color/colorText"
         android:text="Request Time" />
     <TextView
 
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:fontFamily="cursive"
         android:gravity="center"
-        android:text="Current time: "
+        android:text=""
+        android:textColor="#5a5893"
         android:id="@+id/textView1"
+        android:layout_marginTop="10dp"
         android:layout_below="@+id/button1"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
-        android:textSize="30sp" />
+        android:textSize="20sp" />
     <Button
-        android:layout_width="wrap_content"
+        android:layout_width="180dp"
         android:layout_height="wrap_content"
         android:text="Request Location"
+        android:layout_marginTop="20dp"
+        android:background="@color/colorBackground"
         android:id="@+id/button"
+        android:textColor="@color/colorText"
         android:layout_below="@+id/textView1"
         android:layout_centerVertical="true"
         android:layout_centerHorizontal="true" />
@@ -51,9 +66,9 @@
             android:layout_width="match_parent"
             android:gravity="center"
             android:layout_height="wrap_content"
-            android:fontFamily="cursive"
-            android:text="Coordinates: "
-            android:textSize="30sp"
+            android:text=""
+            android:textColor="#5a5893"
+            android:textSize="20sp"
             android:id="@+id/textView"
             android:layout_below="@+id/button"
             android:layout_alignParentLeft="true"

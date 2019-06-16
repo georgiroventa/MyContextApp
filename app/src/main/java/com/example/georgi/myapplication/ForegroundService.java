@@ -31,7 +31,6 @@ public class ForegroundService extends Service {
                 .setContentTitle("Foreground Service")
                 .setContentText(input)
                 .setContentIntent(pendingIntent)
-                .setVibrate(null)
                 .build();
 
 

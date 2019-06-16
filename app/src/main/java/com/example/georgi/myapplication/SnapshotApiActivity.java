@@ -48,7 +48,6 @@ public class SnapshotApiActivity extends AppCompatActivity {
     //data about user
     DataAboutContextUser dataUser;
 
-    private Kmeans kmeans;
 
     Integer activityDb;
     Integer headphoneStatusDb;
@@ -93,24 +92,6 @@ public class SnapshotApiActivity extends AppCompatActivity {
 
 
             displayData();
-
-        }
-
-        //call Kmeans algo
-        float matrix[][] = {{45.76498f, 21.22454f}, {45.76516f, 21.22461f}, {45.76504f, 21.22455f}, {45.74980f, 21.24286f}, {45.74980f, 21.24286f}, {45.74981f, 21.24282f}, {45.74978f, 21.24287f}};
-        final ArrayList<Kmeans.Mean> means;
-        kmeans = new Kmeans();
-        means = (ArrayList<Kmeans.Mean>) kmeans.predict(3,matrix);
-
-        for ( int a  = 0; a < means.size(); a++){
-            Kmeans.Mean mean = means.get(a);
-            float[] c = mean.getCentroid();
-            System.out.println("Mean" + mean.getCentroid());
-            for(int b = 0; b < c.length; b++) {
-                float x = mean.mCentroid[b];
-                System.out.println("Elemente din Mean" + x);
-                float ab = x;
-            }
 
         }
 

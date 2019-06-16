@@ -35,6 +35,7 @@ public class ContextDataActivity extends AppCompatActivity {
 
     Long time_secDb;
     Long timeFormatDb;
+    Double timeSlotDb;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -101,7 +102,7 @@ public class ContextDataActivity extends AppCompatActivity {
                     Log.i("User key", dataSnapshot.getKey());
                     //display current time
                     String time_dateDb = dataSnapshot.getKey();
-                    date_time_tv.setText("Date and current time: " + time_dateDb);
+                    date_time_tv.setText(time_dateDb);
 
                     //display user's activity
                     if(dataSnapshot.child("activity").getValue(Integer.class) != null) {
@@ -135,14 +136,14 @@ public class ContextDataActivity extends AppCompatActivity {
                     if(activityDb == 7){
                         activityDb_type = "Walking";
                     }
-                    activity_tv.setText("User's activity: " + activityDb_type);
+                    activity_tv.setText(activityDb_type);
 
                     //display time in seconds
                     if(dataSnapshot.child("timestamp").getValue(Long.class) != null){
                         time_secDb = dataSnapshot.child("timestamp").getValue(Long.class);
                     }
 
-                    time_sec_tv.setText("Time in seconds: " + time_secDb + " seconds");
+                    time_sec_tv.setText(time_secDb + " seconds");
 
                     //display date format
                     if(dataSnapshot.child("time").getValue(Long.class) != null ){
@@ -215,11 +216,14 @@ public class ContextDataActivity extends AppCompatActivity {
                     }
 
 
-                    date_format_tv.setText("Date: " + day_week_string + String.valueOf(day) + month_string);
+                    date_format_tv.setText(day_week_string + String.valueOf(day) + month_string);
 
                     //display time slot
-                    Double timeSlotDb = dataSnapshot.child("timeslot").getValue(Double.class);
-                    time_slot_tv.setText("Time slot(Half an hour intervals): " + timeSlotDb);
+                    if(dataSnapshot.child("timeslot").getValue(Double.class) != null){
+                        timeSlotDb = dataSnapshot.child("timeslot").getValue(Double.class);
+                    }
+
+                    time_slot_tv.setText("" + timeSlotDb);
 
                     //display status phone
                     if(dataSnapshot.child("headphone").getValue(Integer.class) != null){
@@ -227,24 +231,24 @@ public class ContextDataActivity extends AppCompatActivity {
                     }
 
                     if(headphoneStatusDb == 1){
-                        headphone_tv.setText("Headphone status: " + "Plugged in");
+                        headphone_tv.setText("Plugged in");
                     }
                     else
                     {
-                        headphone_tv.setText("Headphone status: " + "Unplugged");
+                        headphone_tv.setText("Unplugged");
                     }
 
                     //dispaly location in latitude and longitude
                     Double latitudeDb = dataSnapshot.child("latitude").getValue(Double.class);
                     Double longitudeDb = dataSnapshot.child("longitude").getValue(Double.class);
                     String locationDb = "Latitude: " + latitudeDb + "\nLongitude: " + longitudeDb;
-                    location_tv.setText("Current location\n" + locationDb);
+                    location_tv.setText(locationDb);
 
                     //display weather
                     Double temperatureDb = dataSnapshot.child("temperature (°C)").getValue(Double.class);
                     Double humdityDb = dataSnapshot.child("humidity").getValue(Double.class);
                     String weatherDb = "Temperature: " + temperatureDb + " °C \nHumidity: " + humdityDb + " %";
-                    weather_tv.setText("Current weather\n" + weatherDb);
+                    weather_tv.setText(weatherDb);
 
 
             }

@@ -104,8 +104,7 @@ public class NoiseLevelActivity extends AppCompatActivity {
                         startActivity(intent1);
                         break;
                     case R.id.nav_noise:
-                        Intent intent2 = new Intent(NoiseLevelActivity.this, NoiseLevelActivity.class);
-                        startActivity(intent2);
+
                         break;
                     case R.id.nav_coordinates:
                         Intent intent3 = new Intent(NoiseLevelActivity.this, RequestActivity.class);
